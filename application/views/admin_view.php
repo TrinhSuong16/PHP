@@ -78,7 +78,6 @@
             <span style="margin-right: 15px; font-style: italic; color: #94a3b8;">
                 Giờ hệ thống: <?= date('H:i d/m/Y') ?>
             </span>
-            <a href="<?= base_url('index.php/auth/logout') ?>" class="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base">Đăng xuất</a>
         </div>
     </div>
 
@@ -142,19 +141,22 @@
                 pageable: { refresh: true, pageSizes: [15, 30, 50], buttonCount: 5 },
                 filterable: { mode: "menu" },
                 columns: [
-                    { field: "Fullname", title: "Họ tên", width: 160, locked: true },
-                    { field: "Email", title: "Email", width: 200 },
-                    { field: "StatusVerified", title: "Xác minh", width: 130, 
-                      template: "<span class='status-badge #= StatusVerified == \"Đã xác minh\" ? \"yes\" : \"no\" #'>#= StatusVerified #</span>" 
+                    { field: "Fullname", title: "Họ tên", width: 160, locked: true,filterable: false },
+                    { field: "Email", title: "Email", width: 200,filterable: false },
+                    { field: "StatusVerified", title: "Xác minh", width: 130,
+                      template: "<span class='status-badge #= StatusVerified == \"Đã xác minh\" ? \"yes\" : \"no\" #'>#= StatusVerified #</span>",
+                      filterable: { multi: true }
                     },
                     { field: "StatusRead", title: "Đọc Email", width: 130, 
-                      template: "<span class='status-badge #= StatusRead == \"Đã đọc\" ? \"yes\" : \"no\" #'>#= StatusRead #</span>" 
+                      template: "<span class='status-badge #= StatusRead == \"Đã đọc\" ? \"yes\" : \"no\" #'>#= StatusRead #</span>",
+                      filterable: { multi: true }
                     },
                     { field: "StatusDownloaded", title: "Tải tài liệu", width: 130, 
-                      template: "<span class='status-badge #= StatusDownloaded == \"Đã tải\" ? \"yes\" : \"no\" #'>#= StatusDownloaded #</span>" 
+                      template: "<span class='status-badge #= StatusDownloaded == \"Đã tải\" ? \"yes\" : \"no\" #'>#= StatusDownloaded #</span>",
+                      filterable: { multi: true }
                     },
                     {
-                        title: "Thao tác", width: 180,
+                        title: "Thao tác", width: 180,filterable: false,
                         template: function(dataItem) {
                             if (dataItem.StatusVerified === "Chưa xác minh" || dataItem.StatusRead === "Chưa đọc") {
                                 return "<button class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-warning' onclick='resendAction(\"" + dataItem.ID + "\", \"activation\")'>Gửi lại mail xác minh</button>";
@@ -165,9 +167,9 @@
                             }
                         }
                     },
-                    { field: "ReadDate", title: "Ngày đọc", width: 140 },
-                    { field: "DownloadDate", title: "Ngày tải", width: 140 },
-                    { field: "CreatedDate", title: "Ngày ĐK", width: 140 }
+                    { field: "ReadDate", title: "Ngày đọc", width: 140,filterable: false },
+                    { field: "DownloadDate", title: "Ngày tải", width: 140,filterable: false },
+                    { field: "CreatedDate", title: "Ngày ĐK", width: 140,filterable: false }
                 ]
             });
         });

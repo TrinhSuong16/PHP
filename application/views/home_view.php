@@ -94,7 +94,7 @@
         </p>
         
         <div class="btn-group">
-            <a href="<?= base_url('index.php/register') ?>" class="btn btn-register">ĐĂNG KÝ NHẬN</a>
+            <a href="<?= base_url('index.php/register') ?>" class="btn btn-register">ĐĂNG KÝ</a>
             <!-- <a href="<?= base_url('index.php/admin') ?>" class="btn btn-login">XEM DANH SÁCH</a> -->
         </div>
     </section>
