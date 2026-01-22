@@ -27,6 +27,8 @@ class Register extends WFF_Controller {
         parent::__construct();
         $this->load->library('phpmailer_lib');
         $this->load->library('beanstalk');
+                date_default_timezone_set('Asia/Ho_Chi_Minh');
+
     }
 
     // 1. Hiển thị Form đăng ký

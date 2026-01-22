@@ -6,6 +6,8 @@ class Track extends WFF_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->helper('download'); // Nạp helper download của CodeIgniter
+                date_default_timezone_set('Asia/Ho_Chi_Minh');
+
     }
     // Theo dõi mở email qua Tracking Pixel
     public function open_mail($id = NULL) {

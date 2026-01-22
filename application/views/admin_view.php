@@ -134,7 +134,8 @@
             $("#grid").kendoGrid({
                 dataSource: {
                     data: DATA_FROM_PHP,
-                    pageSize: 15
+                    pageSize: 15,
+                   
                 },
                 height: 650,
                 sortable: true,

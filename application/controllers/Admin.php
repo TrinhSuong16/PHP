@@ -28,7 +28,7 @@ class Admin extends WFF_Controller {
     public function index(){
         $this->style_scripts();
         // Lấy toàn bộ danh sách khách hàng
-        // Thử bỏ order_by nếu bạn không chắc chắn bảng có cột created_at
+        $this->db->order_by('id', 'DESC');
         $query = $this->db->get('customers');
         
         if (!$query) {
