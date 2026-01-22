@@ -1,3 +1,8 @@
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row"></div>
+        <div class="content-body">
     <style>
         /* CSS Admin Style */
         .header-area {
@@ -8,7 +13,7 @@
             background: white;
             padding: 15px 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
         }
 
         h2 {
@@ -30,8 +35,8 @@
             text-transform: uppercase;
         }
 
-        .yes { background: #28c76f; }
-        .no { background: #ea5455; }
+        .yes { background-color: #28c76f !important; }
+        .no { background-color: #ea5455 !important; }
 
         /* Kendo Grid Customization */
         .k-grid {
@@ -56,10 +61,14 @@
             border-bottom: 1px solid #edf2f7;
         }
 
-        .k-button-solid-success {
-            background-color: #28c76f !important;
-            border-color: #28c76f !important;
-            color: white !important;
+        /* Đồng bộ màu nút bấm Kendo với Theme */
+        .k-button-solid-primary {
+            background-color: #7367f0 !important;
+            border-color: #7367f0 !important;
+        }
+        .k-button-solid-info {
+            background-color: #00cfe8 !important;
+            border-color: #00cfe8 !important;
         }
     </style>
 
@@ -163,3 +172,6 @@
             });
         });
     </script>
+        </div>
+    </div>
+</div>

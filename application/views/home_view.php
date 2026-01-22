@@ -1,19 +1,17 @@
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row"></div>
+        <div class="content-body">
     <style>
-        /* Toàn bộ mã CSS được đặt ở đây */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         .hero-card {
             background: white;
             padding: 50px 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
             text-align: center;
             max-width: 550px;
-            width: 90%;
+            margin: 0 auto;
         }
 
         h1 {
@@ -84,7 +82,8 @@
             }
         }
     </style>
-    <div class="hero-card">
+
+    <section class="hero-card">
         <h1>ALPHA CENTER</h1>
         <p>
             Nền công nghiệp 4.0 và ứng dụng trí tuệ nhân tạo <strong>AI (Artificial Intelligence)</strong> là những cụm từ được nhắc đến thường xuyên trong thời gian gần đây. Cụ thể hơn đó là <strong>Machine Learning</strong> như một chìa khóa cho cuộc cách mạng công nghiệp 4.0. 
@@ -98,4 +97,7 @@
             <a href="<?= base_url('index.php/register') ?>" class="btn btn-register">ĐĂNG KÝ NHẬN</a>
             <!-- <a href="<?= base_url('index.php/admin') ?>" class="btn btn-login">XEM DANH SÁCH</a> -->
         </div>
+    </section>
+        </div>
     </div>
+</div>

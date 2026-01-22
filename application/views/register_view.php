@@ -1,18 +1,17 @@
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="content-wrapper">
+        <div class="content-header row"></div>
+        <div class="content-body">
     <style>
-        /* CSS STYLES */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
+        .register-container {
             background: #fff;
             padding: 40px 30px;
             border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
             width: 100%;
             max-width: 480px;
+            margin: 0 auto;
         }
 
         h2 {
@@ -118,7 +117,7 @@
         }
     </style>
 
-<div class="container">
+<div class="register-container">
     <h2>ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
     <p class="sub-title">Điền thông tin bên dưới để nhận tài liệu AI miễn phí.</p>
     
@@ -201,3 +200,6 @@
         }
     };
 </script>
+        </div>
+    </div>
+</div>
