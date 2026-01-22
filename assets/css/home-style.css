@@ -1,0 +1,63 @@
+body {
+    font-family: "Montserrat", Helvetica, Arial, serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.hero-card {
+    background: white;
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+}
+
+h1 {
+    color: #7367f0;
+    margin-bottom: 10px;
+}
+
+p {
+    color: #636e72;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-register {
+    background-color: #7367f0;
+    color: white;
+    border: 1px solid #7367f0;
+}
+
+.btn-register:hover {
+    background-color: #5e50ee;
+}
+
+.btn-login {
+    background-color: transparent;
+    color: #2d3436;
+    border: 1px solid #dfe6e9;
+}
+
+.btn-login:hover {
+    background-color: #f1f2f6;
+}

@@ -1,0 +1,79 @@
+/* assets/css/admin-style.css */
+
+body {
+    font-family: "Montserrat", Helvetica, Arial, serif;
+    padding: 20px;
+    background-color: #f8f8f8;
+}
+
+.header-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #7367f0;
+    margin: 0;
+    font-weight: bold;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    display: inline-block;
+    min-width: 85px;
+    text-align: center;
+}
+
+.yes {
+    background: #28c76f;
+}
+
+.no {
+    background: #ea5455;
+}
+
+.k-grid {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* --- PHẦN CẬP NHẬT MỚI ĐỂ CĂN GIỮA --- */
+
+/* 1. Căn giữa chữ ở tiêu đề (Header) */
+.k-grid-header th.k-header {
+    font-weight: bold;
+    color: #5e5873;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* 2. Căn giữa nội dung trong tất cả các ô dữ liệu (Cells) */
+.k-grid td {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* 3. Căn giữa các thành phần bên trong ô (Badge, Button) */
+.k-grid td .k-button,
+.k-grid td .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- GIỮ NGUYÊN CÁC STYLE NÚT BẤM CŨ --- */
+.k-button-solid-success {
+    background-color: #28c76f !important;
+    border-color: #28c76f !important;
+    color: white !important;
+}
+
+.k-i-check-outline {
+    margin-right: 5px;
+}

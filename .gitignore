@@ -1,0 +1,38 @@
+# CodeIgniter 3 Core
+/application/cache/*
+!/application/cache/index.html
+!/application/cache/.htaccess
+
+/application/logs/*
+!/application/logs/index.html
+!/application/logs/.htaccess
+
+/user_guide/
+
+# Composer - Không nên commit thư mục vendor
+/vendor/
+/application/third_party/vendor/
+
+# IDEs and Editors
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Local configuration (Nếu bạn có các môi trường riêng)
+/application/config/development/
+/application/config/testing/
+
+# Smarty compile/cache (Nếu dự án sử dụng Smarty)
+/application/views/templates_c/*
+/application/views/cache/*
+
+# Project specific uploads
+/uploads/*
+!/uploads/index.html
