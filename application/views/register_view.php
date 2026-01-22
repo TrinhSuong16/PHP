@@ -1,28 +1,9 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký nhận tài liệu - ALPHA</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
         /* CSS STYLES */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
@@ -136,8 +117,6 @@
             gap: 5px;
         }
     </style>
-</head>
-<body>
 
 <div class="container">
     <h2>ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
@@ -222,6 +201,3 @@
         }
     };
 </script>
-
-</body>
-</html>

@@ -1,23 +1,5 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản trị ALPHA</title>
-    
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.3.1109/styles/kendo.common.min.css">
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.3.1109/styles/kendo.default-v2.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
         /* CSS Admin Style */
-        body {
-            font-family: 'Inter', sans-serif;
-            padding: 20px;
-            background-color: #f4f7f9;
-            color: #2d3436;
-        }
-
         .header-area {
             display: flex;
             justify-content: space-between;
@@ -80,8 +62,6 @@
             color: white !important;
         }
     </style>
-</head>
-<body>
 
     <div class="header-area">
         <h2>DANH SÁCH ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
@@ -94,10 +74,6 @@
     </div>
 
     <div id="grid"></div>
-
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2022.3.1109/js/kendo.all.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2022.3.1109/js/messages/kendo.messages.vi-VN.min.js"></script>
 
     <script>
         // 1. URL CONFIGURATION
@@ -187,5 +163,3 @@
             });
         });
     </script>
-</body>
-</html>

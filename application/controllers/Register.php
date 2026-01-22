@@ -31,6 +31,7 @@ class Register extends WFF_Controller {
 
     // 1. Hiển thị Form đăng ký
     public function index() {
+        $this->style_scripts();
         $this->data['contents'] = 'register_view';
         $this->smarty->layouts($this->data);
     }

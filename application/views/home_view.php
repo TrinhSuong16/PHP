@@ -1,29 +1,9 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chào mừng đến với Alpha Center</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <style>
         /* Toàn bộ mã CSS được đặt ở đây */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #2d3436;
         }
 
         .hero-card {
@@ -104,8 +84,6 @@
             }
         }
     </style>
-</head>
-<body>
     <div class="hero-card">
         <h1>ALPHA CENTER</h1>
         <p>
@@ -121,5 +99,3 @@
             <!-- <a href="<?= base_url('index.php/admin') ?>" class="btn btn-login">XEM DANH SÁCH</a> -->
         </div>
     </div>
-</body>
-</html>
