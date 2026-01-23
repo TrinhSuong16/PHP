@@ -88,28 +88,6 @@
         var GLOBAL_RESEND_URL = "<?= base_url('index.php/register/resend_handler/') ?>";
         var GLOBAL_API_URL = "<?= base_url('index.php/admin/api_get_data') ?>";
 
-        // 2. DATA SOURCE FROM PHP
-        var DATA_FROM_PHP = [
-            <?php foreach($customers as $c): ?>
-            {
-                ID: "<?= (string)$c->_id ?>",
-                Email: "<?= isset($c->email) ? $c->email : '' ?>",
-                Fullname: "<?= isset($c->fullname) ? $c->fullname : '' ?>",
-                Gender: "<?= isset($c->gender) ? $c->gender : '' ?>",
-                Occupation: "<?= isset($c->occupation) ? $c->occupation : '' ?>",
-                StatusVerified: "<?= !empty($c->is_verified) ? 'Đã xác minh' : 'Chưa xác minh' ?>",
-                StatusRead: "<?= !empty($c->is_email_opened) ? 'Đã đọc' : 'Chưa đọc' ?>",
-                StatusDownloaded: "<?= !empty($c->is_downloaded) ? 'Đã tải' : 'Chưa tải' ?>",
-                ReadDate: "<?= !empty($c->opened_at) ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-' ?>",
-                DownloadDate: "<?= !empty($c->downloaded_at) ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-' ?>",
-                CreatedDate: "<?= !empty($c->created_at) ? date('d/m/Y H:i', strtotime($c->created_at)) : '-' ?>",
-                Address: "<?= isset($c->address) ? addslashes($c->address) : '' ?>",
-                Lat: "<?= isset($c->lat) ? $c->lat : '' ?>",
-                Lng: "<?= isset($c->lng) ? $c->lng : '' ?>"
-            },
-            <?php endforeach; ?>
-        ];
-
         // 3. ACTIONS
         function resendAction(id, type) {
             var title = (type === 'activation') ? "Gửi lại mail xác minh?" : "Gửi lại link tải tài liệu?";
@@ -135,9 +113,24 @@
         $(document).ready(function () {
             $("#grid").kendoGrid({
                 dataSource: {
-                    data: DATA_FROM_PHP,
+                    transport: {
+                        read: {
+                            url: GLOBAL_API_URL,
+                            type: "POST",
+                            contentType: "application/json"
+                        },
+                        parameterMap: function(data) {
+                            return kendo.stringify(data);
+                        }
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total"
+                    },
                     pageSize: 15,
-                   
+                    serverPaging: true,
+                    serverSorting: true,
+                    serverFiltering: true
                 },
                 height: 650,
                 sortable: true,
