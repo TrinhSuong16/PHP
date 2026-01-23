@@ -103,7 +103,9 @@
                 ReadDate: "<?= $c->opened_at ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-' ?>",
                 DownloadDate: "<?= $c->downloaded_at ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-' ?>",
                 CreatedDate: "<?= date('d/m/Y H:i', strtotime($c->created_at)) ?>",
-                Address: "<?= addslashes($c->address) ?>"
+                Address: "<?= addslashes($c->address) ?>",
+                Lat: "<?= $c->lat ?>",
+                Lng: "<?= $c->lng ?>"
             },
             <?php endforeach; ?>
         ];
@@ -170,7 +172,15 @@
                     },
                     { field: "ReadDate", title: "Ngày đọc", width: 140,filterable: false },
                     { field: "DownloadDate", title: "Ngày tải", width: 140,filterable: false },
-                    { field: "CreatedDate", title: "Ngày ĐK", width: 140,filterable: false }
+                    { field: "CreatedDate", title: "Ngày ĐK", width: 140,filterable: false },
+                    { field: "Address", title: "Địa chỉ", width: 200, filterable: false },
+                    { 
+                        title: "Vị trí", 
+                        width: 160, 
+                        filterable: false,
+                        // Hiển thị tọa độ, nếu có tọa độ thì tạo link mở Google Maps luôn cho tiện
+                        template: "#= Lat && Lng ? '<a href=\"https://www.google.com/maps?q=' + Lat + ',' + Lng + '\" target=\"_blank\">📍 ' + Lat + ', ' + Lng + '</a>' : '-' #"
+                    }
                 ]
             });
         });
