@@ -5,6 +5,7 @@ class Track extends WFF_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->library('mongo_db');
         $this->load->helper('download'); // Nạp helper download của CodeIgniter
                 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
@@ -12,10 +13,10 @@ class Track extends WFF_Controller {
     // Theo dõi mở email qua Tracking Pixel
     public function open_mail($id = NULL) {
         if ($id) {
-            $this->db->update('customers', [
+            $this->mongo_db->where(['_id' => $this->mongo_db->create_document_id($id)])->set([
                 'is_email_opened' => 1, 
                 'opened_at' => date('Y-m-d H:i:s')
-            ], ['id' => $id]);
+            ])->update('customers');
         }
         header('Content-Type: image/png');
         echo base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
@@ -23,12 +24,13 @@ class Track extends WFF_Controller {
     // Theo dõi và thực hiện tải file PDF
     public function download($id = NULL) {
         if ($id) {
-            $user = $this->db->get_where('customers', ['id' => $id])->row();
+            $results = $this->mongo_db->get_Where('customers', ['_id' => $this->mongo_db->create_document_id($id)]);
+            $user = !empty($results) ? $results[0] : null;
             if ($user && $user->is_downloaded == 0) {
-                $this->db->update('customers', [
+                $this->mongo_db->where(['_id' => $this->mongo_db->create_document_id($id)])->set([
                     'is_downloaded' => 1, 
                     'downloaded_at' => date('Y-m-d H:i:s')
-                ], ['id' => $id]);
+                ])->update('customers');
             }
         }
         // ĐƯỜNG DẪN FILE PDF CỦA BẠN

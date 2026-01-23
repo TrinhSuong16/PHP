@@ -25,6 +25,7 @@ class Register extends WFF_Controller {
     }
     public function __construct() {
         parent::__construct();
+        $this->load->library('mongo_db');
         $this->load->library('phpmailer_lib');
         $this->load->library('beanstalk');
                 date_default_timezone_set('Asia/Ho_Chi_Minh');
@@ -49,11 +50,12 @@ class Register extends WFF_Controller {
             'lat'             => $this->input->post('lat'),
             'lng'             => $this->input->post('lng'),
             'activation_code' => md5(uniqid(rand(), true)),
-            'is_verified'     => 0
+            'is_verified'     => 0,
+            'created_at'      => date('Y-m-d H:i:s')
         ];
 
         // 2. Lưu thông tin vào Database
-        if ($this->db->insert('customers', $data)) {
+        if ($this->mongo_db->insert('customers', $data)) {
             
             // --- BẮT ĐẦU DÙNG BEANSTALKD ---
             try {
@@ -76,19 +78,21 @@ class Register extends WFF_Controller {
         }
     }
     public function verify($code) {
-        $user = $this->db->get_where('customers', ['activation_code' => $code])->row();
+        $results = $this->mongo_db->get_Where('customers', ['activation_code' => $code]);
+        $user = !empty($results) ? $results[0] : null;
         
         if ($user) {
             $update_data = [
                 'is_verified'     => 1,
                 'opened_at'       => date('Y-m-d H:i:s')
             ];
-            $this->db->update('customers', $update_data, ['id' => $user->id]);
+            $this->mongo_db->where(['_id' => $this->mongo_db->create_document_id($user->_id)])
+                           ->set($update_data)->update('customers');
 
             // Đẩy job vào Queue để Worker xử lý (giúp người dùng không phải đợi lâu)
             $this->beanstalk->push('registration_emails', [
                 'task'     => 'send_download_link',
-                'id'       => $user->id,
+                'id'       => $user->_id,
                 'email'    => $user->email,
                 'fullname' => $user->fullname
             ]);
@@ -101,7 +105,8 @@ class Register extends WFF_Controller {
 
     public function resend_handler($type, $id) {
         // 1. Lấy thông tin user
-        $user = $this->db->get_where('customers', ['id' => $id])->row();
+        $results = $this->mongo_db->get_Where('customers', ['_id' => $this->mongo_db->create_document_id($id)]);
+        $user = !empty($results) ? $results[0] : null;
         if (!$user) {
             echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy người dùng']);
             return;
@@ -109,7 +114,7 @@ class Register extends WFF_Controller {
         // 2. Thay vì gửi mail trực tiếp (chậm), ta đẩy vào Queue (nhanh)
         $pheanstalk = $this->beanstalk->get_instance();
         $job_data = [
-            'id'       => $user->id,
+            'id'       => $user->_id,
             'email'    => $user->email,
             'fullname' => $user->fullname
         ];
@@ -117,7 +122,8 @@ class Register extends WFF_Controller {
         if ($type === 'activation') {
             // Cập nhật mã mới
             $new_code = md5(uniqid(rand(), true));
-            $this->db->update('customers', ['activation_code' => $new_code], ['id' => $id]);
+            $this->mongo_db->where(['_id' => $this->mongo_db->create_document_id($id)])
+                           ->set(['activation_code' => $new_code])->update('customers');
             
             $job_data['task'] = 'send_verification';
             $job_data['activation_code'] = $new_code;

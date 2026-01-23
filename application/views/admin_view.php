@@ -92,20 +92,20 @@
         var DATA_FROM_PHP = [
             <?php foreach($customers as $c): ?>
             {
-                ID: "<?= $c->id ?>",
-                Email: "<?= $c->email ?>",
-                Fullname: "<?= $c->fullname ?>",
-                Gender: "<?= $c->gender ?>",
-                Occupation: "<?= $c->occupation ?>",
-                StatusVerified: "<?= $c->is_verified ? 'Đã xác minh' : 'Chưa xác minh' ?>",
-                StatusRead: "<?= $c->is_email_opened ? 'Đã đọc' : 'Chưa đọc' ?>",
-                StatusDownloaded: "<?= $c->is_downloaded ? 'Đã tải' : 'Chưa tải' ?>",
-                ReadDate: "<?= $c->opened_at ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-' ?>",
-                DownloadDate: "<?= $c->downloaded_at ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-' ?>",
-                CreatedDate: "<?= date('d/m/Y H:i', strtotime($c->created_at)) ?>",
-                Address: "<?= addslashes($c->address) ?>",
-                Lat: "<?= $c->lat ?>",
-                Lng: "<?= $c->lng ?>"
+                ID: "<?= (string)$c->_id ?>",
+                Email: "<?= isset($c->email) ? $c->email : '' ?>",
+                Fullname: "<?= isset($c->fullname) ? $c->fullname : '' ?>",
+                Gender: "<?= isset($c->gender) ? $c->gender : '' ?>",
+                Occupation: "<?= isset($c->occupation) ? $c->occupation : '' ?>",
+                StatusVerified: "<?= !empty($c->is_verified) ? 'Đã xác minh' : 'Chưa xác minh' ?>",
+                StatusRead: "<?= !empty($c->is_email_opened) ? 'Đã đọc' : 'Chưa đọc' ?>",
+                StatusDownloaded: "<?= !empty($c->is_downloaded) ? 'Đã tải' : 'Chưa tải' ?>",
+                ReadDate: "<?= !empty($c->opened_at) ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-' ?>",
+                DownloadDate: "<?= !empty($c->downloaded_at) ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-' ?>",
+                CreatedDate: "<?= !empty($c->created_at) ? date('d/m/Y H:i', strtotime($c->created_at)) : '-' ?>",
+                Address: "<?= isset($c->address) ? addslashes($c->address) : '' ?>",
+                Lat: "<?= isset($c->lat) ? $c->lat : '' ?>",
+                Lng: "<?= isset($c->lng) ? $c->lng : '' ?>"
             },
             <?php endforeach; ?>
         ];

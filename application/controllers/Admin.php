@@ -23,20 +23,14 @@ class Admin extends WFF_Controller {
     }
     public function __construct() {
         parent::__construct();
+        $this->load->library('mongo_db');
     }
 
     public function index(){
         $this->style_scripts();
-        // Lấy toàn bộ danh sách khách hàng
-        $this->db->order_by('id', 'DESC');
-        $query = $this->db->get('customers');
-        
-        if (!$query) {
-            // Nếu query lỗi, in ra lỗi database
-            show_error($this->db->error()['message']);
-        }
-
-        $this->data['customers'] = $query->result();
+        // Lấy dữ liệu từ MongoDB
+        $this->mongo_db->order_by('_id', 'DESC');
+        $this->data['customers'] = $this->mongo_db->get('customers');
         
         // Debug: Bỏ comment dòng dưới để xem dữ liệu có lấy được không rồi die luôn
         // die(print_r($this->data['customers'], true));

@@ -129,7 +129,7 @@ $config['mongo_db']['default'] = [
 	'settings' => [
 		'auth'             => FALSE,
 		'debug'            => TRUE,
-		'return_as'        => 'array',
+		'return_as'        => 'object',
 		'auto_reset_query' => TRUE
 	],
 
@@ -140,7 +140,7 @@ $config['mongo_db']['default'] = [
 		'port'          => '27017',
 		'user_name'     => '',
 		'user_password' => '',
-		'db_name'       => 'example',
+		'db_name'       => 'ci_tut',
 		'db_options'    => []
 	],
 
