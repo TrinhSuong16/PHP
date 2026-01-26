@@ -40,35 +40,62 @@ class Admin extends WFF_Controller {
             $skip = isset($request->skip) ? (int)$request->skip : 0;
             $take = isset($request->take) ? (int)$request->take : 15;
 
-            // 1. Xử lý Filtering (Nếu có)
-            if (isset($request->filter) && !empty($request->filter->filters)) {
-                foreach ($request->filter->filters as $f) {
-                    // Map tên field từ Grid sang DB nếu cần
-                    $field_map = [
-                        'StatusVerified'  => 'is_verified',
-                        'StatusRead'      => 'is_email_opened',
-                        'StatusDownloaded' => 'is_downloaded'
-                    ];
-                    $db_field = isset($field_map[$f->field]) ? $field_map[$f->field] : $f->field;
-                    
-                    // Xử lý logic lọc cho các trạng thái (vì Grid gửi text tiếng Việt)
-                    if (in_array($f->value, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) {
-                        $this->mongo_db->where([$db_field => 1]);
-                    } elseif (in_array($f->value, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
-                        $this->mongo_db->where([$db_field => 0]);
-                    } else {
-                        $this->mongo_db->where([$db_field => $f->value]);
+            // Hàm cục bộ để tái sử dụng logic filter vì count() sẽ reset query
+            $apply_filters = function() use ($request) {
+                if (isset($request->filter) && !empty($request->filter->filters)) {
+                    foreach ($request->filter->filters as $f) {
+                        $sub_filters = isset($f->filters) ? $f->filters : [$f];
+                        $field_map = [
+                            'StatusVerified'   => 'is_verified',
+                            'StatusRead'       => 'is_email_opened',
+                            'StatusDownloaded' => 'is_downloaded',
+                            'Fullname'         => 'fullname',
+                            'Email'            => 'email'
+                        ];
+
+                        $filter_values = [];
+                        $db_field = '';
+
+                        foreach ($sub_filters as $sf) {
+                            $db_field = isset($field_map[$sf->field]) ? $field_map[$sf->field] : strtolower($sf->field);
+                            $val = $sf->value;
+
+                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
+                            elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) $val = 0;
+                            
+                            $filter_values[] = $val;
+                        }
+
+                        if (!empty($db_field)) {
+                            if (count($filter_values) > 1) {
+                                $this->mongo_db->where_in($db_field, $filter_values);
+                            } else {
+                                $this->mongo_db->where([$db_field => $filter_values[0]]);
+                            }
+                        }
                     }
                 }
-            }
+            };
 
-            // 2. Lấy tổng số bản ghi sau khi lọc
+            // 1. Áp dụng filter để đếm tổng số bản ghi thỏa điều kiện
+            $apply_filters();
             $total = $this->mongo_db->count('customers');
 
-            // 3. Xử lý Sorting
+            // 2. Áp dụng lại filter để lấy dữ liệu (vì count đã clear query)
+            $apply_filters();
+
+            // 3. Xử lý Sorting (Cũng cần map field)
             if (isset($request->sort) && !empty($request->sort)) {
+                $field_map = [
+                    'StatusVerified'   => 'is_verified',
+                    'StatusRead'       => 'is_email_opened',
+                    'StatusDownloaded' => 'is_downloaded',
+                    'Fullname'         => 'fullname',
+                    'Email'            => 'email'
+                ];
                 foreach ($request->sort as $s) {
-                    $this->mongo_db->order_by($s->field, strtoupper($s->dir));
+                    $sort_field = isset($field_map[$s->field]) ? $field_map[$s->field] : strtolower($s->field);
+                    $this->mongo_db->order_by($sort_field, strtoupper($s->dir));
                 }
             } else {
                 $this->mongo_db->order_by('_id', 'DESC');

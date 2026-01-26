@@ -139,18 +139,27 @@
                 columns: [
                     { field: "Fullname", title: "Họ tên", width: 160, locked: true,filterable: false },
                     { field: "Email", title: "Email", width: 200,filterable: false },
-                    { field: "StatusVerified", title: "Xác minh", width: 130,
-                      template: "<span class='status-badge #= StatusVerified == \"Đã xác minh\" ? \"yes\" : \"no\" #'>#= StatusVerified #</span>",
-                      filterable: { multi: true }
-                    },
-                    { field: "StatusRead", title: "Đọc Email", width: 130, 
-                      template: "<span class='status-badge #= StatusRead == \"Đã đọc\" ? \"yes\" : \"no\" #'>#= StatusRead #</span>",
-                      filterable: { multi: true }
-                    },
-                    { field: "StatusDownloaded", title: "Tải tài liệu", width: 130, 
-                      template: "<span class='status-badge #= StatusDownloaded == \"Đã tải\" ? \"yes\" : \"no\" #'>#= StatusDownloaded #</span>",
-                      filterable: { multi: true }
-                    },
+                    { 
+                field: "StatusVerified", 
+                title: "Xác minh", 
+                width: 140,
+                template: "<span class='status-badge #= StatusVerified == \"Đã xác minh\" ? \"yes\" : \"no\" #'>#= StatusVerified #</span>",
+                filterable: { multi: true }
+            },
+            { 
+                field: "StatusRead", 
+                title: "Đọc Email", 
+                width: 130,
+                template: "<span class='status-badge #= StatusRead == \"Đã đọc\" ? \"yes\" : \"no\" #'>#= StatusRead #</span>",
+                filterable: { multi: true }
+            },
+            { 
+                field: "StatusDownloaded", 
+                title: "Tải tài liệu", 
+                width: 130,
+                template: "<span class='status-badge #= StatusDownloaded == \"Đã tải\" ? \"yes\" : \"no\" #'>#= StatusDownloaded #</span>",
+                filterable: { multi: true }
+            },
                     {
                         title: "Thao tác", width: 180,filterable: false,
                         template: function(dataItem) {
