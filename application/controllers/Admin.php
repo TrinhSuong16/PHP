@@ -40,42 +40,84 @@ class Admin extends WFF_Controller {
             $skip = isset($request->skip) ? (int)$request->skip : 0;
             $take = isset($request->take) ? (int)$request->take : 15;
 
-            // Hàm cục bộ để tái sử dụng logic filter vì count() sẽ reset query
-            $apply_filters = function() use ($request) {
-                if (isset($request->filter) && !empty($request->filter->filters)) {
-                    foreach ($request->filter->filters as $f) {
-                        $sub_filters = isset($f->filters) ? $f->filters : [$f];
-                        $field_map = [
-                            'StatusVerified'   => 'is_verified',
-                            'StatusRead'       => 'is_email_opened',
-                            'StatusDownloaded' => 'is_downloaded',
-                            'Fullname'         => 'fullname',
-                            'Email'            => 'email'
-                        ];
+            $field_map = [
+                'StatusVerified'   => 'is_verified',
+                'StatusRead'       => 'is_email_opened',
+                'StatusDownloaded' => 'is_downloaded',
+                'Fullname'         => 'fullname',
+                'Email'            => 'email',
+                'ReadDate'         => 'opened_at',
+                'DownloadDate'     => 'downloaded_at',
+                'CreatedDate'      => 'created_at',
+                'Address'          => 'address'
+            ];
 
-                        $filter_values = [];
-                        $db_field = '';
+            // Hàm cục bộ để tái sử dụng logic filter
+            $apply_filters = function() use ($request, $field_map) {
+                if (!isset($request->filter) || empty($request->filter->filters)) return;
 
-                        foreach ($sub_filters as $sf) {
-                            $db_field = isset($field_map[$sf->field]) ? $field_map[$sf->field] : strtolower($sf->field);
-                            $val = $sf->value;
+                // Mảng chứa tất cả điều kiện where
+                $all_wheres = [];
 
-                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
-                            elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) $val = 0;
+                foreach ($request->filter->filters as $f) {
+                    // 1. Trường hợp lọc nhiều giá trị (Multi-check checkbox)
+                    if (isset($f->filters) && !empty($f->filters)) {
+                        $sub_values = [];
+                        $target_field = '';
+                        
+                        foreach ($f->filters as $sub) {
+                            $field_name = isset($sub->field) ? $sub->field : '';
+                            if (!$field_name) continue;
                             
-                            $filter_values[] = $val;
-                        }
+                            $target_field = isset($field_map[$field_name]) ? $field_map[$field_name] : strtolower($field_name);
+                            $val = $sub->value;
 
-                        if (!empty($db_field)) {
-                            if (count($filter_values) > 1) {
-                                $this->mongo_db->where_in($db_field, $filter_values);
-                            } else {
-                                $this->mongo_db->where([$db_field => $filter_values[0]]);
+                            // Chỉ chuyển đổi giá trị cho các cột trạng thái
+                            if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
+                                if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
+                                elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
+                                    // Lọc giá trị 0 HOẶC các bản ghi chưa có trường này (null)
+                                    $sub_values[] = 0;
+                                    $val = null;
+                                }
                             }
+                            $sub_values[] = $val;
+                        }
+                        if ($target_field && !empty($sub_values)) {
+                            $all_wheres[$target_field] = ['$in' => array_unique($sub_values, SORT_REGULAR)];
+                        }
+                    } 
+                    // 2. Trường hợp lọc đơn (Tìm kiếm văn bản hoặc chọn đơn)
+                    else {
+                        $field_name = isset($f->field) ? $f->field : '';
+                        if (!$field_name) continue;
+
+                        $target_field = isset($field_map[$field_name]) ? $field_map[$field_name] : strtolower($field_name);
+                        $val = $f->value;
+
+                        if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
+                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
+                            elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
+                                $val = ['$in' => [0, null]];
+                            }
+                        }
+                        
+                        $operator = isset($f->operator) ? $f->operator : 'eq';
+                        if ($operator === 'contains') {
+                            // Tạo Regex object cho từng điều kiện contains
+                            $regex = new MongoDB\BSON\Regex($val, 'i');
+                            $all_wheres[$target_field] = $regex;
+                        } else {
+                            $all_wheres[$target_field] = $val;
                         }
                     }
                 }
+
+                if (!empty($all_wheres)) {
+                    $this->mongo_db->where($all_wheres);
+                }
             };
+
 
             // 1. Áp dụng filter để đếm tổng số bản ghi thỏa điều kiện
             $apply_filters();
@@ -86,13 +128,6 @@ class Admin extends WFF_Controller {
 
             // 3. Xử lý Sorting (Cũng cần map field)
             if (isset($request->sort) && !empty($request->sort)) {
-                $field_map = [
-                    'StatusVerified'   => 'is_verified',
-                    'StatusRead'       => 'is_email_opened',
-                    'StatusDownloaded' => 'is_downloaded',
-                    'Fullname'         => 'fullname',
-                    'Email'            => 'email'
-                ];
                 foreach ($request->sort as $s) {
                     $sort_field = isset($field_map[$s->field]) ? $field_map[$s->field] : strtolower($s->field);
                     $this->mongo_db->order_by($sort_field, strtoupper($s->dir));

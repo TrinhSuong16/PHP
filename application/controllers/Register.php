@@ -51,6 +51,8 @@ class Register extends WFF_Controller {
             'lng'             => $this->input->post('lng'),
             'activation_code' => md5(uniqid(rand(), true)),
             'is_verified'     => 0,
+            'is_email_opened' => 0,
+            'is_downloaded'   => 0,
             'created_at'      => date('Y-m-d H:i:s')
         ];
 
