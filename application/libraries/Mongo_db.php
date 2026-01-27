@@ -2779,9 +2779,13 @@ Class Mongo_db
         if ($this->auto_reset_query === TRUE) {
             $this->reset_query();
         }
-        if (is_array($resultCount)) {
-            if (is_array($resultCount[0])) {
-                return $resultCount[0]["n"];
+        // Fix: Kiểm tra cả trường hợp kết quả trả về là Object (do return_as = object)
+        if (!empty($resultCount) && isset($resultCount[0])) {
+            $res = $resultCount[0];
+            if (is_object($res)) {
+                return isset($res->n) ? (int)$res->n : 0;
+            } elseif (is_array($res)) {
+                return isset($res["n"]) ? (int)$res["n"] : 0;
             }
         }
         return 0;

@@ -38,7 +38,7 @@ class Admin extends WFF_Controller {
             $request = json_decode(file_get_contents('php://input'));
 
             $skip = isset($request->skip) ? (int)$request->skip : 0;
-            $take = isset($request->take) ? (int)$request->take : 15;
+            $take = isset($request->take) ? (int)$request->take : 1;
 
             $field_map = [
                 'StatusVerified'   => 'is_verified',
@@ -52,92 +52,77 @@ class Admin extends WFF_Controller {
                 'Address'          => 'address'
             ];
 
-            // Hàm cục bộ để tái sử dụng logic filter
+            // Hàm cục bộ để áp dụng filter trực tiếp vào đối tượng mongo_db
+            // Điều này giúp tránh lỗi khi truyền mảng lồng nhau vào hàm where()
             $apply_filters = function() use ($request, $field_map) {
                 if (!isset($request->filter) || empty($request->filter->filters)) return;
 
-                // Mảng chứa tất cả điều kiện where
-                $all_wheres = [];
-
                 foreach ($request->filter->filters as $f) {
-                    // 1. Trường hợp lọc nhiều giá trị (Multi-check checkbox)
                     if (isset($f->filters) && !empty($f->filters)) {
                         $sub_values = [];
                         $target_field = '';
-                        
                         foreach ($f->filters as $sub) {
-                            $field_name = isset($sub->field) ? $sub->field : '';
-                            if (!$field_name) continue;
-                            
-                            $target_field = isset($field_map[$field_name]) ? $field_map[$field_name] : strtolower($field_name);
+                            $target_field = isset($field_map[$sub->field]) ? $field_map[$sub->field] : strtolower($sub->field);
                             $val = $sub->value;
 
-                            // Chỉ chuyển đổi giá trị cho các cột trạng thái
                             if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
                                 if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
                                 elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
-                                    // Lọc giá trị 0 HOẶC các bản ghi chưa có trường này (null)
-                                    $sub_values[] = 0;
-                                    $val = null;
+                                    // Thêm cả 0, false và null để đảm bảo tìm đúng trạng thái "Chưa"
+                                    $sub_values = array_merge($sub_values, [0, false, null]);
+                                    continue;
                                 }
                             }
                             $sub_values[] = $val;
                         }
                         if ($target_field && !empty($sub_values)) {
-                            $all_wheres[$target_field] = ['$in' => array_unique($sub_values, SORT_REGULAR)];
+                            $this->mongo_db->where_in($target_field, array_unique($sub_values, SORT_REGULAR));
                         }
-                    } 
-                    // 2. Trường hợp lọc đơn (Tìm kiếm văn bản hoặc chọn đơn)
-                    else {
-                        $field_name = isset($f->field) ? $f->field : '';
-                        if (!$field_name) continue;
-
-                        $target_field = isset($field_map[$field_name]) ? $field_map[$field_name] : strtolower($field_name);
+                    } else {
+                        $target_field = isset($field_map[$f->field]) ? $field_map[$f->field] : strtolower($f->field);
                         $val = $f->value;
+                        $operator = isset($f->operator) ? $f->operator : 'eq';
 
                         if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
                             if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
                             elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
-                                $val = ['$in' => [0, null]];
+                                // Xử lý trường hợp lọc đơn cho trạng thái "Chưa"
+                                $this->mongo_db->where_in($target_field, [0, false, null]);
+                                continue;
                             }
                         }
                         
-                        $operator = isset($f->operator) ? $f->operator : 'eq';
                         if ($operator === 'contains') {
-                            // Tạo Regex object cho từng điều kiện contains
-                            $regex = new MongoDB\BSON\Regex($val, 'i');
-                            $all_wheres[$target_field] = $regex;
+                            // Một số thư viện dùng like(), một số dùng where_like()
+                            // Sử dụng Regex trực tiếp là cách an toàn nhất cho MongoDB
+                            $this->mongo_db->where($target_field, new MongoDB\BSON\Regex($val, 'i'));
                         } else {
-                            $all_wheres[$target_field] = $val;
+                            $this->mongo_db->where($target_field, $val);
                         }
                     }
                 }
-
-                if (!empty($all_wheres)) {
-                    $this->mongo_db->where($all_wheres);
-                }
             };
 
-
-            // 1. Áp dụng filter để đếm tổng số bản ghi thỏa điều kiện
+            // BƯỚC 1: Tính tổng số bản ghi (Total)
+            $this->mongo_db->reset_query(); // Đảm bảo sạch query trước khi bắt đầu
             $apply_filters();
-            $total = $this->mongo_db->count('customers');
+            $total = (int)$this->mongo_db->count('customers');
 
-            // 2. Áp dụng lại filter để lấy dữ liệu (vì count đã clear query)
+            // BƯỚC 2: Lấy dữ liệu phân trang
+            // Quan trọng: Phải gọi lại apply_filters vì hàm count() đã reset query bên trong thư viện
             $apply_filters();
 
-            // 3. Xử lý Sorting (Cũng cần map field)
             if (isset($request->sort) && !empty($request->sort)) {
                 foreach ($request->sort as $s) {
                     $sort_field = isset($field_map[$s->field]) ? $field_map[$s->field] : strtolower($s->field);
                     $this->mongo_db->order_by($sort_field, strtoupper($s->dir));
                 }
             } else {
-                $this->mongo_db->order_by('_id', 'DESC');
+                $this->mongo_db->order_by('created_at', 'DESC');
             }
 
-            // 4. Lấy dữ liệu phân trang
-            $customers = $this->mongo_db->limit($take, $skip)->get('customers');
+            // Thực hiện skip và take
+            $customers = $this->mongo_db->limit($take)->offset($skip)->get('customers');
 
             $data = [];
             foreach ($customers as $c) {
