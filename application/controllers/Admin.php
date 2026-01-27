@@ -66,10 +66,12 @@ class Admin extends WFF_Controller {
                             $val = $sub->value;
 
                             if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
-                                if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
+                                if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) {
+                                    $sub_values = array_merge($sub_values, [1, true]);
+                                    continue;
+                                }
                                 elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
-                                    // Thêm cả 0, false và null để đảm bảo tìm đúng trạng thái "Chưa"
-                                    $sub_values = array_merge($sub_values, [0, false, null]);
+                                    $sub_values = array_merge($sub_values, [0, false, null, "0"]);
                                     continue;
                                 }
                             }
@@ -84,10 +86,13 @@ class Admin extends WFF_Controller {
                         $operator = isset($f->operator) ? $f->operator : 'eq';
 
                         if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
-                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) $val = 1;
+                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) {
+                                $this->mongo_db->where_in($target_field, [1, true]);
+                                continue;
+                            }
                             elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
                                 // Xử lý trường hợp lọc đơn cho trạng thái "Chưa"
-                                $this->mongo_db->where_in($target_field, [0, false, null]);
+                                $this->mongo_db->where_in($target_field, [0, false, null, "0"]);
                                 continue;
                             }
                         }
@@ -106,7 +111,12 @@ class Admin extends WFF_Controller {
             // BƯỚC 1: Tính tổng số bản ghi (Total)
             $this->mongo_db->reset_query(); // Đảm bảo sạch query trước khi bắt đầu
             $apply_filters();
-            $total = (int)$this->mongo_db->count('customers');
+            $count_res = $this->mongo_db->count('customers');
+            
+            // Đảm bảo total luôn là số nguyên, kể cả khi count trả về null hoặc object
+            $total = 0;
+            if (is_numeric($count_res)) $total = (int)$count_res;
+            elseif (is_object($count_res) && isset($count_res->n)) $total = (int)$count_res->n;
 
             // BƯỚC 2: Lấy dữ liệu phân trang
             // Quan trọng: Phải gọi lại apply_filters vì hàm count() đã reset query bên trong thư viện

@@ -144,21 +144,30 @@
                 title: "Xác minh", 
                 width: 140,
                 template: "<span class='status-badge #= StatusVerified == \"Đã xác minh\" ? \"yes\" : \"no\" #'>#= StatusVerified #</span>",
-                filterable: { multi: true }
+                filterable: { 
+                    multi: true, 
+                    dataSource: [{ StatusVerified: "Đã xác minh" }, { StatusVerified: "Chưa xác minh" }] 
+                }
             },
             { 
                 field: "StatusRead", 
                 title: "Đọc Email", 
                 width: 130,
                 template: "<span class='status-badge #= StatusRead == \"Đã đọc\" ? \"yes\" : \"no\" #'>#= StatusRead #</span>",
-                filterable: { multi: true }
+                filterable: { 
+                    multi: true, 
+                    dataSource: [{ StatusRead: "Đã đọc" }, { StatusRead: "Chưa đọc" }] 
+                }
             },
             { 
                 field: "StatusDownloaded", 
                 title: "Tải tài liệu", 
                 width: 130,
                 template: "<span class='status-badge #= StatusDownloaded == \"Đã tải\" ? \"yes\" : \"no\" #'>#= StatusDownloaded #</span>",
-                filterable: { multi: true }
+                filterable: { 
+                    multi: true, 
+                    dataSource: [{ StatusDownloaded: "Đã tải" }, { StatusDownloaded: "Chưa tải" }] 
+                }
             },
                     {
                         title: "Thao tác", width: 180,filterable: false,

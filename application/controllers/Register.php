@@ -138,7 +138,7 @@ class Register extends WFF_Controller {
         // Trả về kết quả ngay lập tức cho Giao diện
         echo json_encode([
             'status' => 'success', 
-            'message' => 'Yêu cầu đã được tiếp nhận. Hệ thống đang gửi mail ngầm cho bạn.'
+            'message' => 'Yêu cầu đã được tiếp nhận. '
         ]);
     }
 }
