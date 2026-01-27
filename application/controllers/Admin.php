@@ -38,7 +38,7 @@ class Admin extends WFF_Controller {
             $request = json_decode(file_get_contents('php://input'));
 
             $skip = isset($request->skip) ? (int)$request->skip : 0;
-            $take = isset($request->take) ? (int)$request->take : 1;
+            $take = isset($request->take) ? (int)$request->take : 15;
 
             $field_map = [
                 'StatusVerified'   => 'is_verified',
@@ -52,8 +52,6 @@ class Admin extends WFF_Controller {
                 'Address'          => 'address'
             ];
 
-            // Hàm cục bộ để áp dụng filter trực tiếp vào đối tượng mongo_db
-            // Điều này giúp tránh lỗi khi truyền mảng lồng nhau vào hàm where()
             $apply_filters = function() use ($request, $field_map) {
                 if (!isset($request->filter) || empty($request->filter->filters)) return;
 
@@ -107,7 +105,7 @@ class Admin extends WFF_Controller {
                     }
                 }
             };
-
+            
             // BƯỚC 1: Tính tổng số bản ghi (Total)
             $this->mongo_db->reset_query(); // Đảm bảo sạch query trước khi bắt đầu
             $apply_filters();
