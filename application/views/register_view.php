@@ -279,8 +279,12 @@
             title: "Current View Model State",
             visible: true,
             actions: ["Minimize", "Maximize"],
-            position: { top: 20, left: 20 }
-        }).data("kendoWindow").wrapper.css({ position: "fixed" });
+        }).data("kendoWindow").wrapper.css({
+            position: "fixed",
+            top: "50%",
+            left: "20px",
+            transform: "translateY(-50%)"
+        });
 
         // XỬ LÝ ĐỊNH VỊ (GEOLOCATION) TÍCH HỢP VÀO VIEWMODEL
         if (navigator.geolocation) {
