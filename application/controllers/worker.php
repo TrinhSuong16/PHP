@@ -46,7 +46,6 @@ class Worker extends WFF_Controller {
                             break;
                     }
                     if ($success) {
-                        // Hiển thị thông báo chi tiết loại mail nào thành công
                         echo "THÀNH CÔNG: Đã gửi " . $task_name . " cho " . $data['email'] . "\n";
                                 echo "===============================================\n";
 
@@ -60,9 +59,9 @@ class Worker extends WFF_Controller {
                 }
             } catch (Exception $e) {
                 echo "\nLỖI HỆ THỐNG: " . $e->getMessage() . "\n";
-                sleep(5); // Nghỉ 5s trước khi khởi động lại vòng lặp nếu mất kết nối Beanstalkd
+                sleep(5); 
             }
-            usleep(100000); // Nghỉ 0.1s             // Giải phóng bộ nhớ sau mỗi vòng lặp nếu cần
+            usleep(100000); 
         }
     }
 }
