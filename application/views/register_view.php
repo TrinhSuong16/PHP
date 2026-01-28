@@ -66,45 +66,79 @@
         .fieldlist li { margin-bottom: 10px; display: flex; align-items: center; }
         .fieldlist label { width: 100px; font-weight: 500; margin-bottom: 0; }
         .fieldlist select { flex: 1; margin-bottom: 0; }
+
+        /* Style cho bảng theo dõi trạng thái */
+        #stateWindow pre {
+            margin: 0;
+            padding: 15px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            border-radius: 0 0 8px 8px;
+        }
+        #stateWindow span { color: #9cdcfe; }
+        .k-window-titlebar { background: var(--primary); color: white; font-weight: bold; }
     </style>
+
+<div id="stateWindow" style="display:none;">
+    <pre class="prettyprint">
+{
+  email: "<span data-bind="text: email"></span>",
+  fullname: "<span data-bind="text: fullname"></span>",
+  gender: "<span data-bind="text: gender"></span>",
+  birthday: "<span data-bind="text: displayBirthday"></span>",
+  occupation: "<span data-bind="text: occupation"></span>",
+  address: "<span data-bind="text: address"></span>",
+  location: {
+    lat: <span data-bind="text: lat"></span>,
+    lng: <span data-bind="text: lng"></span>
+  }
+}
+    </pre>
+</div>
 
 <div class="register-container">
     <h2>ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
     <p class="sub-title">Điền thông tin bên dưới để nhận tài liệu AI miễn phí.</p>
     
-    <form action="<?= base_url('index.php/register/submit'); ?>" method="post">
+    <form id="registerForm" action="<?= base_url('index.php/register/submit'); ?>" method="post">
         <label>Email *</label>
-        <input type="email" name="email" placeholder="Ví dụ: nva@gmail.com" required>
+        <input type="email" name="email" placeholder="Ví dụ: nva@gmail.com" required 
+               data-bind="value: email" style="width: 100%">
 
         <label>Họ và tên *</label>
-        <input type="text" name="fullname" placeholder="Nhập đầy đủ họ tên" required>
+        <input type="text" name="fullname" placeholder="Nhập đầy đủ họ tên" required 
+               data-bind="value: fullname" style="width: 100%">
 
         <div class="flex-row">
             <div>
                 <label>Giới tính</label>
-                <select name="gender">
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                </select>
+                <select name="gender" data-role="dropdownlist" 
+                        data-bind="source: genders, value: gender" style="width: 100%"></select>
             </div>
             <div>
                 <label>Ngày sinh</label>
-                <input type="date" name="birthday" required>
+                <input name="birthday" data-role="datepicker" required 
+                       data-bind="value: birthday" style="width: 100%">
             </div>
         </div>
 
         <label>Nghề nghiệp</label>
-        <input type="text" name="occupation" placeholder="Ví dụ: Sinh viên, Kỹ sư...">
+        <input type="text" name="occupation" data-role="autocomplete" 
+               data-bind="source: occupations, value: occupation" 
+               placeholder="Ví dụ: Sinh viên, Kỹ sư..." style="width: 100%">
 
         <label>Địa chỉ</label>
-        <textarea name="address" placeholder="Nhập địa chỉ của bạn"></textarea>
+        <textarea name="address" placeholder="Nhập địa chỉ của bạn"
+                  data-bind="value: address"></textarea>
 
         <input type="hidden" name="lat" id="lat">
         <input type="hidden" name="lng" id="lng">
         
         <div id="status" class="location-status">
-            🔍 Đang xác định vị trí...
+            <span data-bind="text: locationStatus, style: { color: statusColor }">🔍 Đang xác định vị trí...</span>
         </div>
 
        <div id="example">
@@ -175,11 +209,22 @@
 <script>
     $(document).ready(function () {
         
-
         var viewModel = kendo.observable({
+            // DỮ LIỆU FORM
+            email: "",
+            fullname: "",
+            gender: "Nam",
+            birthday: new Date(),
+            occupation: "",
+            address: "",
+            lat: "",
+            lng: "",
+            locationStatus: "🔍 Đang xác định vị trí...",
+            statusColor: "#94a3b8",
+
             // STYLE NÚT
             btnColor: "#ffffff",
-            btnBackground: "#ff4500",
+            btnBackground: "#7367f0",
             btnBorderColor: "#ff8c00",
             btnBorderStyle: "solid",
             btnBorderRadius: "8px",
@@ -207,47 +252,58 @@
                 { name: "Dotted", value: "dotted" },
                 { name: "Double", value: "double" },
                 { name: "None", value: "none" }
-            ]
+            ],
+
+            genders: ["Nam", "Nữ", "Khác"],
+            
+            occupations: [
+                "Sinh viên", 
+                "Kỹ sư phần mềm", 
+                "Chuyên gia AI", 
+                "Giảng viên", 
+                "Kinh doanh", 
+                "Khác"
+            ],
+
+            displayBirthday: function() {
+                return kendo.toString(this.get("birthday"), "dd/MM/yyyy");
+            }
         });
 
-        kendo.bind($("#example"), viewModel);
-    });
-    // XỬ LÝ ĐỊNH VỊ (GEOLOCATION)
-    window.onload = function() {
-        const statusDisplay = document.getElementById("status");
-        
+        // Bind toàn bộ body để bao gồm cả Window và Form
+        kendo.bind($(".content-body"), viewModel);
+
+        // Khởi tạo Kendo Window để có thể di chuyển (Draggable)
+        $("#stateWindow").kendoWindow({
+            width: "350px",
+            title: "Current View Model State",
+            visible: true,
+            actions: ["Minimize", "Maximize"],
+            position: { top: 20, left: 20 }
+        }).data("kendoWindow").wrapper.css({ position: "fixed" });
+
+        // XỬ LÝ ĐỊNH VỊ (GEOLOCATION) TÍCH HỢP VÀO VIEWMODEL
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    document.getElementById("lat").value = lat;
-                    document.getElementById("lng").value = lng;
-                    
-                    statusDisplay.innerHTML = "✅ Đã lấy được vị trí của bạn.";
-                    statusDisplay.style.color = "#28c76f";
+                    viewModel.set("lat", position.coords.latitude);
+                    viewModel.set("lng", position.coords.longitude);
+                    viewModel.set("locationStatus", "✅ Đã lấy được vị trí của bạn.");
+                    viewModel.set("statusColor", "#28c76f");
+                    // Cập nhật input hidden cho form submit truyền thống
+                    $("#lat").val(position.coords.latitude);
+                    $("#lng").val(position.coords.longitude);
                 }, 
                 function(error) {
-                    let msg = "";
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED: 
-                            msg = "❌ Vị trí bị từ chối."; break;
-                        case error.POSITION_UNAVAILABLE: 
-                            msg = "❌ Không tìm thấy vị trí."; break;
-                        case error.TIMEOUT: 
-                            msg = "❌ Hết thời gian lấy vị trí."; break;
-                        default: 
-                            msg = "❌ Lỗi định vị."; break;
-                    }
-                    statusDisplay.innerHTML = msg;
-                    statusDisplay.style.color = "#ea5455";
+                    viewModel.set("locationStatus", "❌ Không thể xác định vị trí.");
+                    viewModel.set("statusColor", "#ea5455");
                 }
             );
         } else {
-            statusDisplay.innerHTML = "❌ Trình duyệt không hỗ trợ định vị.";
+            viewModel.set("locationStatus", "❌ Trình duyệt không hỗ trợ định vị.");
+            viewModel.set("statusColor", "#ea5455");
         }
-    };
+    });
 </script>
         </div>
     </div>
