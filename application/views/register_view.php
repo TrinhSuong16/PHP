@@ -158,7 +158,6 @@
 
         <button type="submit">ĐĂNG KÝ NGAY</button>
         
-        <!-- <a href="<?= base_url(); ?>" class="btn-back">QUAY LẠI TRANG CHỦ</a> -->
     </form>
 </div>
 

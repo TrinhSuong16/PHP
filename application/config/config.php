@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = ' https://desperate-virgin-irc-theater.trycloudflare.com/framework/';
+$config['base_url'] = ' https://beaver-ourselves-paste-centuries.trycloudflare.com/framework/';
 // $config['base_url'] = 'http://localhost/framework/';
 $config['sess_driver'] = 'files';
 $config['sess_save_path'] = sys_get_temp_dir();
