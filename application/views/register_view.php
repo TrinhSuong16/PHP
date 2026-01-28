@@ -4,117 +4,68 @@
         <div class="content-header row"></div>
         <div class="content-body">
     <style>
+        :root {
+            --primary: #7367f0;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+        }
         .register-container {
-            background: #fff;
-            padding: 40px 30px;
-            border-radius: 16px;
+            background: #fff; padding: 40px 30px; border-radius: 16px;
             box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
+            width: 100%; max-width: 480px; margin: 0 auto;
         }
-
-        h2 {
-            color: #2d3436;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+        .register-container h2 {
+            color: var(--text-main); text-align: center; margin-bottom: 10px;
+            font-weight: 700; letter-spacing: -0.5px;
         }
-
-        .sub-title {
-            font-size: 14px;
-            color: #636e72;
-            text-align: center;
-            margin-bottom: 30px;
+        .sub-title { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 30px; }
+        .register-container label { font-weight: 600; display: block; margin-bottom: 8px; color: var(--text-main); font-size: 14px; }
+        .register-container input, .register-container select, .register-container textarea {
+            width: 100%; padding: 12px 16px; margin-bottom: 20px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 14px; transition: all 0.3s ease; outline: none; font-family: inherit;
         }
-
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 8px;
-            color: #2d3436;
-            font-size: 14px;
+        .register-container input:focus, .register-container select:focus, .register-container textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.1);
         }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border: 1px solid #dfe6e9;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            outline: none;
-            font-family: inherit;
+        .flex-row { display: flex; gap: 15px; }
+        .flex-row > div { flex: 1; }
+        textarea { height: 45px; resize: none; }
+        .register-wrapper { position: relative; width: 100%; }
+        .register-btn {
+            width: 100%; padding: 16px; font-size: 18px; font-weight: bold;
+            border: 2px solid transparent; border-radius: 8px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s ease; background-color: var(--primary); color: white;
         }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #7367f0;
-            box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.1);
-        }
-
-        .flex-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .flex-row > div {
-            flex: 1;
-        }
-
-        textarea {
-            height: 45px;
-            resize: none;
-        }
-
-        button {
-            background-color: #7367f0;
-            color: white;
-            border: none;
-            padding: 16px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #5e50ee;
-            transform: translateY(-1px);
+        .register-btn:hover {
+            opacity: 0.9; transform: translateY(-1px);
             box-shadow: 0 5px 15px rgba(115, 103, 240, 0.3);
         }
-
+        .register-btn .arrow { font-size: 14px; transition: transform 0.3s ease; }
+        .register-wrapper:hover .arrow { transform: rotate(180deg); }
+        .register-dropdown {
+            position: absolute; bottom: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid #ddd;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); padding: 15px;
+            z-index: 1000; margin-bottom: 10px; opacity: 0; visibility: hidden;
+            transform: translateY(10px); transition: all 0.3s ease;
+        }
+        .register-wrapper:hover .register-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
         .btn-back {
-            display: block;
-            text-decoration: none;
-            text-align: center;
-            color: #b2bec3;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: color 0.3s;
+            display: block; text-decoration: none; text-align: center; color: #b2bec3;
+            padding: 12px; margin-top: 15px; font-size: 14px; font-weight: 600; transition: color 0.3s;
         }
-
-        .btn-back:hover {
-            color: #7367f0;
-        }
-
+        .btn-back:hover { color: var(--primary); }
         .location-status {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: -15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            font-size: 12px; color: #94a3b8; margin-top: -15px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 5px;
         }
+        .fieldlist { list-style: none; padding: 0; margin: 0; }
+        .fieldlist li { margin-bottom: 10px; display: flex; align-items: center; }
+        .fieldlist label { width: 100px; font-weight: 500; margin-bottom: 0; }
+        .fieldlist select { flex: 1; margin-bottom: 0; }
     </style>
 
 <div class="register-container">
@@ -156,12 +107,111 @@
             🔍 Đang xác định vị trí...
         </div>
 
-        <button type="submit">ĐĂNG KÝ NGAY</button>
-        
+       <div id="example">
+            <div class="demo-section">
+
+                <div class="register-wrapper position-top">
+
+                    <button type="submit"
+                        id="btnRegister"
+                        class="register-btn"
+                        data-bind="style: {
+                            backgroundColor: btnBackground,
+                            color: btnColor,
+                            borderStyle: btnBorderStyle,
+                            borderColor: btnBorderColor,
+                            borderRadius: btnBorderRadius
+                        }">
+
+                        Đăng ký ngay
+                        <span class="arrow">▼</span>
+                    </button>
+
+                    <!-- DROPDOWN FORM -->
+                    <div class="register-dropdown">
+                        <ul class="fieldlist">
+                            <li>
+                                <label>Màu chữ:</label>
+                                <select data-text-field="name"
+                                        data-value-field="hex"
+                                        data-bind="source: colors, value: btnColor"></select>
+                            </li>
+
+                            <li>
+                                <label>Màu nền:</label>
+                                <select data-text-field="name"
+                                        data-value-field="hex"
+                                        data-bind="source: colors, value: btnBackground"></select>
+                            </li>
+
+                            <li>
+                                <label>Màu viền:</label>
+                                <select data-text-field="name"
+                                        data-value-field="hex"
+                                        data-bind="source: colors, value: btnBorderColor"></select>
+                            </li>
+
+                            <li>
+                                <label>Kiểu viền:</label>
+                                <select data-text-field="name"
+                                        data-value-field="value"
+                                        data-bind="source: borders, value: btnBorderStyle"></select>
+                            </li>
+
+                            <li>
+                                <label>Bo góc:</label>
+                                <select data-bind="source: radii, value: btnBorderRadius"></select>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
     </form>
 </div>
 
 <script>
+    $(document).ready(function () {
+        
+
+        var viewModel = kendo.observable({
+            // STYLE NÚT
+            btnColor: "#ffffff",
+            btnBackground: "#ff4500",
+            btnBorderColor: "#ff8c00",
+            btnBorderStyle: "solid",
+            btnBorderRadius: "8px",
+
+            // DATA SOURCE
+            radii: [
+                "0px",
+                "6px",
+                "10px",
+                "20px",
+                "30px"
+            ],
+
+            colors: [
+                { name: "Trắng", hex: "#ffffff" },
+                { name: "Đỏ cam", hex: "#ff4500" },
+                { name: "Cam đậm", hex: "#ff8c00" },
+                { name: "Vàng", hex: "#ffd700" },
+                { name: "Xanh lá", hex: "#28a745" }
+            ],
+
+            borders: [
+                { name: "Solid", value: "solid" },
+                { name: "Dashed", value: "dashed" },
+                { name: "Dotted", value: "dotted" },
+                { name: "Double", value: "double" },
+                { name: "None", value: "none" }
+            ]
+        });
+
+        kendo.bind($("#example"), viewModel);
+    });
     // XỬ LÝ ĐỊNH VỊ (GEOLOCATION)
     window.onload = function() {
         const statusDisplay = document.getElementById("status");
