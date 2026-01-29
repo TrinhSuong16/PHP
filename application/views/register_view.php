@@ -126,7 +126,8 @@
         </div>
 
         <label>Nghề nghiệp</label>
-        <input type="text" name="occupation" data-role="autocomplete" 
+        <input type="text" name="occupation" data-role="autocomplete"
+               data-min-length="0"
                data-bind="source: occupations, value: occupation" 
                placeholder="Ví dụ: Sinh viên, Kỹ sư..." style="width: 100%">
 
@@ -194,7 +195,7 @@
 
                             <li>
                                 <label>Bo góc:</label>
-                                <select data-bind="source: radii, value: btnBorderRadius"></select>
+                                <select data-bind="source: radio, value: btnBorderRadius"></select>
                             </li>
                         </ul>
                     </div>
@@ -230,7 +231,7 @@
             btnBorderRadius: "8px",
 
             // DATA SOURCE
-            radii: [
+            radio: [
                 "0px",
                 "6px",
                 "10px",
@@ -257,13 +258,46 @@
             genders: ["Nam", "Nữ", "Khác"],
             
             occupations: [
-                "Sinh viên", 
-                "Kỹ sư phần mềm", 
-                "Chuyên gia AI", 
-                "Giảng viên", 
-                "Kinh doanh", 
+                "Sinh viên",
+                "Lập trình viên (Frontend/Backend)",
+                "Kỹ sư phần mềm (Software Engineer)",
+                "Chuyên gia AI / Machine Learning",
+                "Kỹ sư dữ liệu (Data Engineer)",
+                "Chuyên gia phân tích dữ liệu (Data Analyst)",
+                "Kỹ sư DevOps",
+                "Kiểm thử phần mềm (Tester/QA)",
+                "Quản trị hệ thống (System Admin)",
+                "Chuyên gia bảo mật (Cyber Security)",
+                "Quản lý dự án (Project Manager)",
+                "Product Manager",
+                "Thiết kế đồ họa (Graphic Designer)",
+                "Thiết kế UI/UX",
+                "Marketing / SEO Specialist",
+                "Content Creator / Copywriter",
+                "Kinh doanh / Sales",
+                "Chuyên viên nhân sự (HR)",
+                "Kế toán / Kiểm toán",
+                "Phân tích tài chính",
+                "Nhân viên ngân hàng",
+                "Luật sư / Pháp chế",
+                "Bác sĩ / Y tá",
+                "Dược sĩ",
+                "Giảng viên / Giáo viên",
+                "Nghiên cứu khoa học",
+                "Kiến trúc sư",
+                "Kỹ sư xây dựng",
+                "Kỹ sư điện / Cơ khí",
+                "Biên tập viên / Nhà báo",
+                "Video Editor",
+                "Nhiếp ảnh gia",
+                "Tiếp viên hàng không",
+                "Hướng dẫn viên du lịch",
+                "Đầu bếp / Bartender",
+                "Freelancer",
+                "Chủ doanh nghiệp",
+                "Nhân viên văn phòng",
                 "Khác"
-            ],
+            ].sort(),
 
             displayBirthday: function() {
                 return kendo.toString(this.get("birthday"), "dd/MM/yyyy");
@@ -305,6 +339,11 @@
             viewModel.set("locationStatus", "❌ Trình duyệt không hỗ trợ định vị.");
             viewModel.set("statusColor", "#ea5455");
         }
+
+        // Kích hoạt gợi ý ngay khi nhấn vào ô Nghề nghiệp
+        $("[name='occupation']").on("focus", function() {
+            $(this).data("kendoAutoComplete").search("");
+        });
 
         // Xử lý click vào mũi tên để hiện dropdown thay vì hover
         $(".arrow").on("click", function(e) {

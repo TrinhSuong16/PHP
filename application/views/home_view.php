@@ -81,23 +81,64 @@
                 flex: 1;
             }
         }
+
+        .toggle-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #7367f0;
+            cursor: pointer;
+        }
     </style>
 
     <section class="hero-card">
         <h1>ALPHA CENTER</h1>
-        <p>
+
+        <label class="toggle-info">
+            <input type="checkbox" data-bind="checked: slideValue" /> 
+            <span>Hiển thị chi tiết tài liệu</span>
+        </label>
+
+        <p data-bind="slide: slideValue" style="display: none;">
             Nền công nghiệp 4.0 và ứng dụng trí tuệ nhân tạo <strong>AI (Artificial Intelligence)</strong> là những cụm từ được nhắc đến thường xuyên trong thời gian gần đây. Cụ thể hơn đó là <strong>Machine Learning</strong> như một chìa khóa cho cuộc cách mạng công nghiệp 4.0. 
             <br><br>
             Tài liệu này là nguồn nội dung có liên quan cho các chuyên gia khoa học dữ liệu và kỹ sư máy học, những người muốn đi sâu vào các thuật toán phức tạp và cải thiện dự đoán của mô hình.
             <br><br>
-            Để nhận được tài liệu này, vui lòng click đăng ký.
         </p>
-        
+        <p>            Để nhận được tài liệu này, vui lòng click đăng ký.</p>
+
         <div class="btn-group">
             <a href="<?= base_url('index.php/register') ?>" class="btn btn-register">ĐĂNG KÝ</a>
             <!-- <a href="<?= base_url('index.php/admin') ?>" class="btn btn-login">XEM DANH SÁCH</a> -->
         </div>
     </section>
+
+    <script>
+        $(document).ready(function() {
+            // Định nghĩa Custom Binder "slide" cho Kendo UI
+            kendo.data.binders.slide = kendo.data.Binder.extend({
+                refresh: function() {
+                    var value = this.bindings["slide"].get();
+                    if (value) {
+                        $(this.element).slideDown();
+                    } else {
+                        $(this.element).slideUp();
+                    }
+                }
+            });
+
+            // Khởi tạo ViewModel
+            var viewModel = kendo.observable({
+                slideValue: false // Mặc định ẩn nội dung
+            });
+
+            // Thực hiện binding cho section hero-card
+            kendo.bind($(".hero-card"), viewModel);
+        });
+    </script>
         </div>
     </div>
 </div>
