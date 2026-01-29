@@ -131,9 +131,10 @@
                data-bind="source: occupations, value: occupation" 
                placeholder="Ví dụ: Sinh viên, Kỹ sư..." style="width: 100%">
 
-        <label>Địa chỉ</label>
-        <textarea name="address" placeholder="Nhập địa chỉ của bạn"
-                  data-bind="value: address"></textarea>
+        <label>Địa chỉ chi tiết *</label>
+        <input type="text" id="addressAutocomplete" name="address" required
+               placeholder="Gõ để tìm địa chỉ (ví dụ: 123 Lê Lợi...)" 
+               data-bind="value: address" style="width: 100%">
 
         <input type="hidden" name="lat" id="lat">
         <input type="hidden" name="lng" id="lng">
@@ -303,6 +304,39 @@
         });
 
         kendo.bind($(".content-body"), viewModel);
+
+        // Cấu hình Autocomplete cho địa chỉ sử dụng OpenStreetMap
+        $("#addressAutocomplete").kendoAutoComplete({
+            dataTextField: "display_name",
+            filter: "contains",
+            minLength: 3,
+            delay: 500,
+            dataSource: {
+                serverFiltering: true,
+                transport: {
+                    read: {
+                        url: "https://nominatim.openstreetmap.org/search",
+                        dataType: "json",
+                        data: function() {
+                            return {
+                                q: $("#addressAutocomplete").val(),
+                                format: "json",
+                                addressdetails: 1,
+                                limit: 5,
+                                countrycodes: "vn" // Chỉ tìm kiếm tại Việt Nam
+                            };
+                        }
+                    }
+                }
+            },
+            select: function(e) {
+                var dataItem = this.dataItem(e.item.index());
+                viewModel.set("lat", dataItem.lat);
+                viewModel.set("lng", dataItem.lon);
+                viewModel.set("locationStatus", "✅ Đã xác định vị trí từ địa chỉ chọn.");
+                viewModel.set("statusColor", "#28c76f");
+            }
+        });
 
         $("#stateWindow").kendoWindow({
             width: "350px",
