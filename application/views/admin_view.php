@@ -4,6 +4,13 @@
         <div class="content-header row"></div>
         <div class="content-body">
     <style>
+        :root {
+            --primary-color: #7367f0;
+            --success-color: #28c76f;
+            --danger-color: #ea5455;
+            --info-color: #00cfe8;
+        }
+
         /* CSS Admin Style */
         .header-area {
             display: flex;
@@ -17,7 +24,7 @@
         }
 
         h2 {
-            color: #7367f0;
+            color: var(--primary-color);
             margin: 0;
             font-weight: 700;
             font-size: 1.5rem;
@@ -35,8 +42,8 @@
             text-transform: uppercase;
         }
 
-        .yes { background-color: #28c76f !important; }
-        .no { background-color: #ea5455 !important; }
+        .yes { background-color: var(--success-color) !important; }
+        .no { background-color: var(--danger-color) !important; }
 
         /* Kendo Grid Customization */
         .k-grid {
@@ -63,18 +70,50 @@
 
         /* Đồng bộ màu nút bấm Kendo với Theme */
         .k-button-solid-primary {
-            background-color: #7367f0 !important;
-            border-color: #7367f0 !important;
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
         }
         .k-button-solid-info {
-            background-color: #00cfe8 !important;
-            border-color: #00cfe8 !important;
+            background-color: var(--info-color) !important;
+            border-color: var(--info-color) !important;
         }
+        .k-button-solid-success {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+        }
+        .k-button-solid-warning {
+            background-color: var(--danger-color) !important;
+            border-color: var(--danger-color) !important;
+        }
+
+        /* Theme Switcher Styles */
+        .theme-switcher {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .theme-opt {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .theme-opt:hover { transform: scale(1.2); }
     </style>
 
     <div class="header-area">
         <h2>DANH SÁCH ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
-        <div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="theme-switcher">
+                <span style="font-size: 12px; color: #94a3b8; font-weight: 600;"></span>
+                <span class="theme-opt" style="background: #7367f0;" onclick="changeTheme('purple')" title="Tím hiện đại"></span>
+                <span class="theme-opt" style="background: #2d3436;" onclick="changeTheme('dark')" title="Đen chuyên nghiệp"></span>
+                <span class="theme-opt" style="background: #10ac84;" onclick="changeTheme('nature')" title="Xanh thiên nhiên"></span>
+                <span class="theme-opt" style="background: #0984e3;" onclick="changeTheme('ocean')" title="Xanh đại dương"></span>
+            </div>
             <span style="margin-right: 15px; font-style: italic; color: #94a3b8;">
                 Giờ hệ thống: <?= date('H:i d/m/Y') ?>
             </span>
@@ -87,6 +126,32 @@
         // 1. URL CONFIGURATION
         var GLOBAL_RESEND_URL = "<?= base_url('index.php/register/resend_handler/') ?>";
         var GLOBAL_API_URL = "<?= base_url('index.php/admin/api_get_data') ?>";
+
+        // 2. THEME LOGIC
+        var themes = {
+            purple: { primary: '#7367f0', success: '#28c76f', danger: '#f07676', info: '#00cfe8' },
+            dark:   { primary: '#2d3436', success: '#05ad51', danger: '#de4949', info: '#0984e3' },
+            nature: { primary: '#10ac84', success: '#1dd1a1', danger: '#de9595', info: '#48dbfb' },
+            ocean:  { primary: '#0984e3', success: '#00cec9', danger: '#fab1a0', info: '#74b9ff' }
+        };
+
+        function changeTheme(themeKey) {
+            var theme = themes[themeKey] || themes.purple;
+            var root = document.documentElement;
+            
+            root.style.setProperty('--primary-color', theme.primary);
+            root.style.setProperty('--success-color', theme.success);
+            root.style.setProperty('--danger-color', theme.danger);
+            root.style.setProperty('--info-color', theme.info);
+            
+            localStorage.setItem('admin_theme_key', themeKey);
+        }
+
+        // Khôi phục theme từ localStorage khi load trang
+        var savedThemeKey = localStorage.getItem('admin_theme_key');
+        if (savedThemeKey) {
+            changeTheme(savedThemeKey);
+        }
 
         // 3. ACTIONS
         function resendAction(id, type) {
