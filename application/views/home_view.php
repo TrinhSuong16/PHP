@@ -92,6 +92,11 @@
             color: #7367f0;
             cursor: pointer;
         }
+
+        .important {
+            color: #ff4757 !important; /* Màu đỏ khi được chọn */
+            font-weight: bold;
+        }
     </style>
 
     <section class="hero-card">
@@ -99,7 +104,7 @@
 
         <label class="toggle-info">
             <input type="checkbox" data-bind="checked: slideValue" /> 
-            <span>Hiển thị chi tiết tài liệu</span>
+            <span data-bind="css: { important: slideValue }">Hiển thị chi tiết tài liệu</span>
         </label>
 
         <p data-bind="slide: slideValue" style="display: none;">

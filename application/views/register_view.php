@@ -209,12 +209,10 @@
 
 <script>
     $(document).ready(function () {
-        
         var viewModel = kendo.observable({
-            // DỮ LIỆU FORM
             email: "",
             fullname: "",
-            gender: "Nam",
+            gender: "",
             birthday: new Date(),
             occupation: "",
             address: "",
@@ -255,7 +253,7 @@
                 { name: "None", value: "none" }
             ],
 
-            genders: ["Nam", "Nữ", "Khác"],
+            genders: ["Nam", "Nữ"],
             
             occupations: [
                 "Sinh viên",
@@ -326,7 +324,6 @@
                     viewModel.set("lng", position.coords.longitude);
                     viewModel.set("locationStatus", "✅ Đã lấy được vị trí của bạn.");
                     viewModel.set("statusColor", "#28c76f");
-                    // Cập nhật input hidden cho form submit truyền thống
                     $("#lat").val(position.coords.latitude);
                     $("#lng").val(position.coords.longitude);
                 }, 
@@ -347,8 +344,8 @@
 
         // Xử lý click vào mũi tên để hiện dropdown thay vì hover
         $(".arrow").on("click", function(e) {
-            e.preventDefault(); // Ngăn submit form khi nhấn vào mũi tên
-            e.stopPropagation(); // Ngăn sự kiện lan ra ngoài
+            e.preventDefault(); 
+            e.stopPropagation(); 
             $(this).closest(".register-wrapper").toggleClass("active");
         });
 
