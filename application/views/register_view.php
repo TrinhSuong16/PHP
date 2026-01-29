@@ -44,7 +44,7 @@
             box-shadow: 0 5px 15px rgba(115, 103, 240, 0.3);
         }
         .register-btn .arrow { font-size: 14px; transition: transform 0.3s ease; }
-        .register-wrapper:hover .arrow { transform: rotate(180deg); }
+        .register-wrapper.active .arrow { transform: rotate(90deg); }
         .register-dropdown {
             position: absolute; bottom: 100%; left: 0; right: 0;
             background: #fff; border: 1px solid #ddd;
@@ -52,7 +52,7 @@
             z-index: 1000; margin-bottom: 10px; opacity: 0; visibility: hidden;
             transform: translateY(10px); transition: all 0.3s ease;
         }
-        .register-wrapper:hover .register-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .register-wrapper.active .register-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
         .btn-back {
             display: block; text-decoration: none; text-align: center; color: #b2bec3;
             padding: 12px; margin-top: 15px; font-size: 14px; font-weight: 600; transition: color 0.3s;
@@ -84,18 +84,18 @@
 
 <div id="stateWindow" style="display:none;">
     <pre class="prettyprint">
-{
-  email: "<span data-bind="text: email"></span>",
-  fullname: "<span data-bind="text: fullname"></span>",
-  gender: "<span data-bind="text: gender"></span>",
-  birthday: "<span data-bind="text: displayBirthday"></span>",
-  occupation: "<span data-bind="text: occupation"></span>",
-  address: "<span data-bind="text: address"></span>",
-  location: {
-    lat: <span data-bind="text: lat"></span>,
-    lng: <span data-bind="text: lng"></span>
-  }
-}
+
+  - email: "<span data-bind="text: email"></span>"
+  - fullname: "<span data-bind="text: fullname"></span>"
+  - gender: "<span data-bind="text: gender"></span>"
+  - birthday: "<span data-bind="text: displayBirthday"></span>"
+  - occupation: "<span data-bind="text: occupation"></span>"
+  - address: "<span data-bind="text: address"></span>"
+  - location: 
+    + lat: <span data-bind="text: lat"></span>
+    + lng: <span data-bind="text: lng"></span>
+  
+
     </pre>
 </div>
 
@@ -270,13 +270,11 @@
             }
         });
 
-        // Bind toàn bộ body để bao gồm cả Window và Form
         kendo.bind($(".content-body"), viewModel);
 
-        // Khởi tạo Kendo Window để có thể di chuyển (Draggable)
         $("#stateWindow").kendoWindow({
             width: "350px",
-            title: "Current View Model State",
+            title: "info",
             visible: true,
             actions: ["Minimize", "Maximize"],
         }).data("kendoWindow").wrapper.css({
@@ -307,6 +305,20 @@
             viewModel.set("locationStatus", "❌ Trình duyệt không hỗ trợ định vị.");
             viewModel.set("statusColor", "#ea5455");
         }
+
+        // Xử lý click vào mũi tên để hiện dropdown thay vì hover
+        $(".arrow").on("click", function(e) {
+            e.preventDefault(); // Ngăn submit form khi nhấn vào mũi tên
+            e.stopPropagation(); // Ngăn sự kiện lan ra ngoài
+            $(this).closest(".register-wrapper").toggleClass("active");
+        });
+
+        // Đóng dropdown khi click ra ngoài vùng register-wrapper
+        $(document).on("click", function(e) {
+            if (!$(e.target).closest(".register-wrapper").length) {
+                $(".register-wrapper").removeClass("active");
+            }
+        });
     });
 </script>
         </div>
