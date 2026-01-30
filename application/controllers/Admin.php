@@ -32,174 +32,261 @@ class Admin extends WFF_Controller {
         $this->smarty->layouts($this->data);
     }
 
+
     public function api_get_data() {
-    if ($this->input->server('REQUEST_METHOD') !== 'POST') return;
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            header('Content-Type: application/json');
+            $request = json_decode(file_get_contents('php://input'));
 
-    header('Content-Type: application/json');
-    $request = json_decode(file_get_contents('php://input'));
+            $skip = isset($request->skip) ? (int)$request->skip : 0;
+            $take = isset($request->take) ? (int)$request->take : 15;
 
-    $skip = isset($request->skip) ? (int)$request->skip : 0;
-    $take = isset($request->take) ? (int)$request->take : 15;
+            $field_map = [
+                'StatusVerified'   => 'is_verified',
+                'StatusRead'       => 'is_email_opened',
+                'StatusDownloaded' => 'is_downloaded',
+                'Fullname'         => 'fullname',
+                'Email'            => 'email',
+                'ReadDate'         => 'opened_at',
+                'DownloadDate'     => 'downloaded_at',
+                'CreatedDate'      => 'created_at',
+                'Address'          => 'address'
+            ];
 
-    $field_map = [
-        'StatusVerified'   => 'is_verified',
-        'StatusRead'       => 'is_email_opened',
-        'StatusDownloaded' => 'is_downloaded',
-        'Fullname'         => 'fullname',
-        'Email'            => 'email',
-        'ReadDate'         => 'opened_at',
-        'DownloadDate'     => 'downloaded_at',
-        'CreatedDate'      => 'created_at',
-        'Address'          => 'address'
-    ];
+            $apply_filters = function() use ($request, $field_map) {
+                if (!isset($request->filter) || empty($request->filter->filters)) return;
 
-    /* ==============================
-     * 1. BUILD FILTER (CHỈ 1 LẦN)
-     * ============================== */
-    $filters = [];
+                foreach ($request->filter->filters as $f) {
+                    if (isset($f->filters) && !empty($f->filters)) {
+                        $sub_values = [];
+                        $target_field = '';
+                        foreach ($f->filters as $sub) {
+                            $target_field = isset($field_map[$sub->field]) ? $field_map[$sub->field] : strtolower($sub->field);
+                            $val = $sub->value;
 
-    if (isset($request->filter->filters)) {
-        foreach ($request->filter->filters as $f) {
-
-            // ===== GROUP FILTER =====
-            if (isset($f->filters)) {
-                $values = [];
-                $field = '';
-
-                foreach ($f->filters as $sub) {
-                    $field = $field_map[$sub->field] ?? strtolower($sub->field);
-                    $val = $sub->value;
-
-                    if (in_array($field, ['is_verified','is_email_opened','is_downloaded'])) {
-                        if (in_array($val, ['Đã xác minh','Đã đọc','Đã tải'])) {
-                            $values = array_merge($values, [1, true]);
-                            continue;
+                            if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
+                                if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) {
+                                    $sub_values = array_merge($sub_values, [1, true]);
+                                    continue;
+                                }
+                                elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
+                                    $sub_values = array_merge($sub_values, [0, false, null, "0"]);
+                                    continue;
+                                }
+                            }
+                            $sub_values[] = $val;
                         }
-                        if (in_array($val, ['Chưa xác minh','Chưa đọc','Chưa tải'])) {
-                            $values = array_merge($values, [0, false, null, "0"]);
-                            continue;
+                        if ($target_field && !empty($sub_values)) {
+                            $this->mongo_db->where_in($target_field, array_unique($sub_values, SORT_REGULAR));
+                        }
+                    } else {
+                        $target_field = isset($field_map[$f->field]) ? $field_map[$f->field] : strtolower($f->field);
+                        $val = $f->value;
+                        $operator = isset($f->operator) ? $f->operator : 'eq';
+
+                        if (in_array($target_field, ['is_verified', 'is_email_opened', 'is_downloaded'])) {
+                            if (in_array($val, ['Đã xác minh', 'Đã đọc', 'Đã tải'])) {
+                                $this->mongo_db->where_in($target_field, [1, true]);
+                                continue;
+                            }
+                            elseif (in_array($val, ['Chưa xác minh', 'Chưa đọc', 'Chưa tải'])) {
+                                // Xử lý trường hợp lọc đơn cho trạng thái "Chưa"
+                                $this->mongo_db->where_in($target_field, [0, false, null, "0"]);
+                                continue;
+                            }
+                        }
+                        
+                        if ($operator === 'contains') {
+                            $this->mongo_db->where($target_field, new MongoDB\BSON\Regex($val, 'i'));
+                        } else {
+                            $this->mongo_db->where($target_field, $val);
                         }
                     }
-                    $values[] = $val;
                 }
+            };
+            
+            $this->mongo_db->reset_query(); 
+            $apply_filters();
+            $count_res = $this->mongo_db->count('customers');
+            
+            $total = 0;
+            if (is_numeric($count_res)) $total = (int)$count_res;
+            elseif (is_object($count_res) && isset($count_res->n)) $total = (int)$count_res->n;
 
-                if ($field && $values) {
-                    $filters[] = [
-                        'type'  => 'where_in',
-                        'field' => $field,
-                        'value' => array_unique($values, SORT_REGULAR)
-                    ];
+            // BƯỚC 2: Lấy dữ liệu phân trang
+            $apply_filters();
+
+            if (isset($request->sort) && !empty($request->sort)) {
+                foreach ($request->sort as $s) {
+                    $sort_field = isset($field_map[$s->field]) ? $field_map[$s->field] : strtolower($s->field);
+                    $this->mongo_db->order_by($sort_field, strtoupper($s->dir));
                 }
+            } else {
+                $this->mongo_db->order_by('created_at', 'DESC');
             }
 
-            // ===== SINGLE FILTER =====
-            else {
-                $field = $field_map[$f->field] ?? strtolower($f->field);
-                $val = $f->value;
-                $operator = $f->operator ?? 'eq';
+            $customers = $this->mongo_db->limit($take)->offset($skip)->get('customers');
 
-                if (in_array($field, ['is_verified','is_email_opened','is_downloaded'])) {
-                    if (in_array($val, ['Đã xác minh','Đã đọc','Đã tải'])) {
-                        $filters[] = ['type'=>'where_in','field'=>$field,'value'=>[1,true]];
-                        continue;
-                    }
-                    if (in_array($val, ['Chưa xác minh','Chưa đọc','Chưa tải'])) {
-                        $filters[] = ['type'=>'where_in','field'=>$field,'value'=>[0,false,null,"0"]];
-                        continue;
-                    }
-                }
-
-                if ($operator === 'contains') {
-                    $filters[] = ['type'=>'regex','field'=>$field,'value'=>$val];
-                } else {
-                    $filters[] = ['type'=>'where','field'=>$field,'value'=>$val];
-                }
+            $data = [];
+            foreach ($customers as $c) {
+                $data[] = [
+                    'ID'               => (string)$c->_id,
+                    'Email'            => isset($c->email) ? $c->email : '',
+                    'Fullname'         => isset($c->fullname) ? $c->fullname : '',
+                    'Gender'           => isset($c->gender) ? $c->gender : '',
+                    'Occupation'       => isset($c->occupation) ? $c->occupation : '',
+                    'StatusVerified'   => !empty($c->is_verified) ? 'Đã xác minh' : 'Chưa xác minh',
+                    'StatusRead'       => !empty($c->is_email_opened) ? 'Đã đọc' : 'Chưa đọc',
+                    'StatusDownloaded' => !empty($c->is_downloaded) ? 'Đã tải' : 'Chưa tải',
+                    'ReadDate'         => !empty($c->opened_at) ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-',
+                    'DownloadDate'     => !empty($c->downloaded_at) ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-',
+                    'CreatedDate'      => !empty($c->created_at) ? date('d/m/Y H:i', strtotime($c->created_at)) : '-',
+                    'Address'          => isset($c->address) ? $c->address : '',
+                    'Lat'              => isset($c->lat) ? $c->lat : '',
+                    'Lng'              => isset($c->lng) ? $c->lng : ''
+                ];
             }
+            echo json_encode(['data' => $data, 'total' => $total]);
         }
     }
 
-    /* ==============================
-     * 2. COUNT
-     * ============================== */
-    $this->mongo_db->reset_query();
-    foreach ($filters as $f) {
-        if ($f['type'] === 'where') {
-            $this->mongo_db->where($f['field'], $f['value']);
-        }
-        elseif ($f['type'] === 'where_in') {
-            $this->mongo_db->where_in($f['field'], $f['value']);
-        }
-        elseif ($f['type'] === 'regex') {
-            $this->mongo_db->where(
-                $f['field'],
-                new MongoDB\BSON\Regex($f['value'], 'i')
-            );
-        }
-    }
-    $total = (int)$this->mongo_db->count('customers');
+    // public function api_get_data() {
+    //     if ($this->input->server('REQUEST_METHOD') !== 'POST') return;
 
-    /* ==============================
-     * 3. GET DATA
-     * ============================== */
-    $this->mongo_db->reset_query();
-    foreach ($filters as $f) {
-        if ($f['type'] === 'where') {
-            $this->mongo_db->where($f['field'], $f['value']);
-        }
-        elseif ($f['type'] === 'where_in') {
-            $this->mongo_db->where_in($f['field'], $f['value']);
-        }
-        elseif ($f['type'] === 'regex') {
-            $this->mongo_db->where(
-                $f['field'],
-                new MongoDB\BSON\Regex($f['value'], 'i')
-            );
-        }
-    }
+    //     header('Content-Type: application/json');
+    //     $request = json_decode(file_get_contents('php://input'));
 
-    // SORT
-    if (!empty($request->sort)) {
-        foreach ($request->sort as $s) {
-            $field = $field_map[$s->field] ?? strtolower($s->field);
-            $this->mongo_db->order_by($field, strtoupper($s->dir));
-        }
-    } else {
-        $this->mongo_db->order_by('created_at', 'DESC');
-    }
+    //     $skip = isset($request->skip) ? (int)$request->skip : 0;
+    //     $take = isset($request->take) ? (int)$request->take : 15;
 
-    // PAGING
-    $customers = $this->mongo_db
-        ->limit($take)
-        ->offset($skip)
-        ->get('customers');
+    //     $field_map = [
+    //         'StatusVerified'   => 'is_verified',
+    //         'StatusRead'       => 'is_email_opened',
+    //         'StatusDownloaded' => 'is_downloaded',
+    //         'Fullname'         => 'fullname',
+    //         'Email'            => 'email',
+    //         'ReadDate'         => 'opened_at',
+    //         'DownloadDate'     => 'downloaded_at',
+    //         'CreatedDate'      => 'created_at',
+    //         'Address'          => 'address'
+    //     ];
 
-    /* ==============================
-     * 4. FORMAT RESPONSE
-     * ============================== */
-    $data = [];
-    foreach ($customers as $c) {
-        $data[] = [
-            'ID'               => (string)$c->_id,
-            'Email'            => $c->email ?? '',
-            'Fullname'         => $c->fullname ?? '',
-            'Gender'           => $c->gender ?? '',
-            'Occupation'       => $c->occupation ?? '',
-            'StatusVerified'   => !empty($c->is_verified) ? 'Đã xác minh' : 'Chưa xác minh',
-            'StatusRead'       => !empty($c->is_email_opened) ? 'Đã đọc' : 'Chưa đọc',
-            'StatusDownloaded' => !empty($c->is_downloaded) ? 'Đã tải' : 'Chưa tải',
-            'ReadDate'         => !empty($c->opened_at) ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-',
-            'DownloadDate'     => !empty($c->downloaded_at) ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-',
-            'CreatedDate'      => !empty($c->created_at) ? date('d/m/Y H:i', strtotime($c->created_at)) : '-',
-            'Address'          => $c->address ?? '',
-            'Lat'              => $c->lat ?? '',
-            'Lng'              => $c->lng ?? ''
-        ];
-    }
+    //     $filters = [];
 
-    echo json_encode([
-        'data'  => $data,
-        'total' => $total
-    ]);
-}
+    //     if (isset($request->filter->filters)) {
+    //         foreach ($request->filter->filters as $f) {
+    //             if (isset($f->filters)) {
+    //                 $values = [];
+    //                 $field = '';
+    //                 foreach ($f->filters as $sub) {
+    //                     $field = $field_map[$sub->field] ?? strtolower($sub->field);
+    //                     $val = $sub->value;
+    //                     if (in_array($field, ['is_verified','is_email_opened','is_downloaded'])) {
+    //                         if (in_array($val, ['Đã xác minh','Đã đọc','Đã tải'])) {
+    //                             $values = array_merge($values, [1, true]);
+    //                             continue;
+    //                         }
+    //                         if (in_array($val, ['Chưa xác minh','Chưa đọc','Chưa tải'])) {
+    //                             $values = array_merge($values, [0, false, null, "0"]);
+    //                             continue;
+    //                         }
+    //                     }
+    //                     $values[] = $val;
+    //                 }
+    //                 if ($field && $values) {
+    //                     $filters[] = [
+    //                         'type'  => 'where_in',
+    //                         'field' => $field,
+    //                         'value' => array_unique($values, SORT_REGULAR)
+    //                     ];
+    //                 }
+    //             }
+    //             else {
+    //                 $field = $field_map[$f->field] ?? strtolower($f->field);
+    //                 $val = $f->value;
+    //                 $operator = $f->operator ?? 'eq';
+    //                 if (in_array($field, ['is_verified','is_email_opened','is_downloaded'])) {
+    //                     if (in_array($val, ['Đã xác minh','Đã đọc','Đã tải'])) {
+    //                         $filters[] = ['type'=>'where_in','field'=>$field,'value'=>[1,true]];
+    //                         continue;
+    //                     }
+    //                     if (in_array($val, ['Chưa xác minh','Chưa đọc','Chưa tải'])) {
+    //                         $filters[] = ['type'=>'where_in','field'=>$field,'value'=>[0,false,null,"0"]];
+    //                         continue;
+    //                     }
+    //                 }
+    //                 if ($operator === 'contains') {
+    //                     $filters[] = ['type'=>'regex','field'=>$field,'value'=>$val];
+    //                 } else {
+    //                     $filters[] = ['type'=>'where','field'=>$field,'value'=>$val];
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     $this->mongo_db->reset_query();
+    //     foreach ($filters as $f) {
+    //         if ($f['type'] === 'where') {
+    //             $this->mongo_db->where($f['field'], $f['value']);
+    //         }
+    //         elseif ($f['type'] === 'where_in') {
+    //             $this->mongo_db->where_in($f['field'], $f['value']);
+    //         }
+    //         elseif ($f['type'] === 'regex') {
+    //             $this->mongo_db->where( $f['field'], new MongoDB\BSON\Regex($f['value'], 'i')
+    //             );
+    //         }
+    //     }
+    //     $total = (int)$this->mongo_db->count('customers');
+
+
+    //     $this->mongo_db->reset_query();
+    //     foreach ($filters as $f) {
+    //         if ($f['type'] === 'where') {
+    //             $this->mongo_db->where($f['field'], $f['value']);
+    //         }
+    //         elseif ($f['type'] === 'where_in') {
+    //             $this->mongo_db->where_in($f['field'], $f['value']);
+    //         }
+    //         elseif ($f['type'] === 'regex') {
+    //             $this->mongo_db->where( $f['field'], new MongoDB\BSON\Regex($f['value'], 'i')
+    //             );
+    //         }
+    //     }
+
+    //     if (!empty($request->sort)) {
+    //         foreach ($request->sort as $s) {
+    //             $field = $field_map[$s->field] ?? strtolower($s->field);
+    //             $this->mongo_db->order_by($field, strtoupper($s->dir));
+    //         }
+    //     } else {
+    //         $this->mongo_db->order_by('created_at', 'DESC');
+    //     }
+
+    //     $customers = $this->mongo_db->limit($take)->offset($skip)->get('customers');
+
+    //     $data = [];
+    //     foreach ($customers as $c) {
+    //         $data[] = [
+    //             'ID'               => (string)$c->_id,
+    //             'Email'            => $c->email ?? '',
+    //             'Fullname'         => $c->fullname ?? '',
+    //             'Gender'           => $c->gender ?? '',
+    //             'Occupation'       => $c->occupation ?? '',
+    //             'StatusVerified'   => !empty($c->is_verified) ? 'Đã xác minh' : 'Chưa xác minh',
+    //             'StatusRead'       => !empty($c->is_email_opened) ? 'Đã đọc' : 'Chưa đọc',
+    //             'StatusDownloaded' => !empty($c->is_downloaded) ? 'Đã tải' : 'Chưa tải',
+    //             'ReadDate'         => !empty($c->opened_at) ? date('d/m/Y H:i', strtotime($c->opened_at)) : '-',
+    //             'DownloadDate'     => !empty($c->downloaded_at) ? date('d/m/Y H:i', strtotime($c->downloaded_at)) : '-',
+    //             'CreatedDate'      => !empty($c->created_at) ? date('d/m/Y H:i', strtotime($c->created_at)) : '-',
+    //             'Address'          => $c->address ?? '',
+    //             'Lat'              => $c->lat ?? '',
+    //             'Lng'              => $c->lng ?? ''
+    //         ];
+    //     }
+
+    //     echo json_encode(['data'  => $data, 'total' => $total ]);
+    // }
+
 
 }

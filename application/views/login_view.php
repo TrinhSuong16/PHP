@@ -1,152 +1,178 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập Admin - ALPHA</title>
+    <base href="https://demos.telerik.com/kendo-ui/mvvm/source">
+    <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
+    <title></title>
+    <link href="https://kendo.cdn.telerik.com/themes/12.3.0/default/default-ocean-blue.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        /* Toàn bộ mã CSS được đặt ở đây */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 380px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        h3 {
-            color: #2d3436;
-            margin-bottom: 25px;
-            padding-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 1.5rem;
-            position: relative;
-        }
-
-        /* Tạo gạch chân trang trí dưới tiêu đề */
-        h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: #7367f0;
-            border-radius: 2px;
-        }
-
-        /* Thông báo lỗi */
-        .error-msg {
-            color: #dc3545;
-            background: #fff5f5;
-            border: 1px solid #feb2b2;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        /* Form styling */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: #7367f0;
-            box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #7367f0;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background: #5e50ee;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(115, 103, 240, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .btn-back {
-            display: inline-block;
-            margin-top: 25px;
-            text-decoration: none;
-            color: #94a3b8;
-            font-size: 14px;
-            transition: color 0.3s;
-        }
-
-        .btn-back:hover {
-            color: #7367f0;
-        }
-    </style>
+    
+    
+    <script src="https://kendo.cdn.telerik.com/2025.4.1321/js/kendo.all.min.js"></script>
+    
+    
 </head>
 <body>
-    <div class="login-box">
-        <h3>ĐĂNG NHẬP</h3>
-        
-        <?php if($this->session->flashdata('error')): ?>
-            <div class="error-msg">
-                ⚠️ <?= $this->session->flashdata('error') ?>
-            </div>
-        <?php endif; ?>
+    <div id="example">
+    <div class="demo-section wide">
+        <div class="box-col">
+            <h4>Add a product</h4>
+            <ul class="options">
+                <li>
+                    <label>Name:</label>
+                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
+                        <input type="text" placeholder="Enter name" data-bind="value: productName" class="k-input-inner" />
+                    </span>
+                </li>
+                <li>
+                    <label>Price:</label>
+                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
+                        <input type="text" placeholder="Enter number" data-bind="value: productPrice" class="k-input-inner" />
+                    </span>
+                </li>
+                <li>
+                    <label>Units in stock:</label>
+                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
+                        <input type="text" placeholder="Enter number" data-bind="value: productUnitsInStock" class="k-input-inner" />
+                    </span>
+                </li>
+                <li>
+                    <button class="k-button k-button-solid-base k-button-solid k-button-md k-rounded-md" data-bind="click: addProduct">Add a new product</button>
+                </li>
+            </ul>
+        </div>
 
-        <form action="<?= base_url('index.php/auth/process_login') ?>" method="post">
-            <input type="text" name="username" placeholder="Tên đăng nhập" required autocomplete="username">
-            <input type="password" name="password" placeholder="Mật khẩu" required autocomplete="current-password">
-            <button type="submit">ĐĂNG NHẬP HỆ THỐNG</button>
-        </form>
-
-        <a href="<?= base_url() ?>" class="btn-back">← Quay lại trang chủ</a>
+        <table id="products" class="metrotable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Units</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody data-template="row-template" data-bind="source: products">
+            </tbody>
+            <tfoot data-template="footer-template" data-bind="source: this">
+            </tfoot>
+        </table>
     </div>
+
+    <script id="row-template" type="text/x-kendo-template">
+        <tr>
+            <td data-bind="text: name">
+            </td>
+            <td data-bind="text: price" data-format="C">
+            </td>
+            <td data-bind="text: unitsInStock"></td>
+            <td><button class="k-button k-button-solid-warning k-button-solid k-button-md k-rounded-md" data-bind="click: deleteProduct">Delete</button></td>
+        </tr>
+    </script>
+    <script id="footer-template" type="text/x-kendo-template">
+        <tr>
+            <td>
+                Products count: #: total() #
+            </td>
+            <td>
+                Total price: #: totalPrice() #
+            </td>
+            <td colspan="2">
+                Units in stock: #: totalUnitsInStock() #
+            </td>
+        </tr>
+    </script>
+    <script>
+    $(document).ready(function() {
+        var viewModel = kendo.observable({
+            productName: "Product name",
+            productPrice: 10,
+            productUnitsInStock: 10,
+            addProduct: function() {
+                this.get("products").push({
+                    name: this.get("productName"),
+                    price: parseFloat(this.get("productPrice")),
+                    unitsInStock: parseFloat(this.get("productUnitsInStock"))
+                });
+            },
+            deleteProduct: function(e) {
+                // the current data item (product) is passed as the "data" field of the event argument
+                var product = e.data;
+
+                var products = this.get("products");
+
+                var index = products.indexOf(product);
+
+                // remove the product by using the splice method
+                products.splice(index, 1);
+            },
+            total: function() {
+                return this.get("products").length;
+            },
+            totalPrice: function() {
+                var sum = 0;
+
+                $.each(this.get("products"), function(index, product) {
+                    sum += product.price;
+                });
+
+                return sum;
+            },
+            totalUnitsInStock: function() {
+                var sum = 0;
+
+                $.each(this.get("products"), function(index, product) {
+                    sum += product.unitsInStock;
+                });
+
+                return sum;
+            },
+            products: [
+                { name: "Hampton Sofa", price: 989.99, unitsInStock: 39 },
+                { name: "Perry Sofa", price: 559.99, unitsInStock: 17 },
+                { name: "Donovan Sofa", price: 719.99, unitsInStock: 29 },
+                { name: "Markus Sofa", price: 839.99, unitsInStock: 3 }
+            ]
+        });
+
+        kendo.bind($("#example"), viewModel);
+    });
+    </script>
+  
+    <style>
+        .demo-section {
+        	min-height: 200px;
+        }
+        .metrotable > tbody > tr > td  {
+        	font-size: 12px;
+        }
+        .metrotable > thead > tr > th {
+        	font-size: 14px;
+        	padding-top: 0;
+        }
+
+        .metrotable > tfoot > tr > td {
+        	padding-right: 10px;
+        }
+
+        .box-col label {
+            display: inline-block;
+            width: 95px;
+        }
+        .code-sample {
+            clear: right;
+        }
+
+        .prettyprint {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            overflow: auto;
+            padding: 5px;
+        }
+    </style>
+</div>
+
+
+
 </body>
 </html>

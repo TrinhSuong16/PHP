@@ -84,25 +84,22 @@
 
 <div id="stateWindow" style="display:none;">
     <pre class="prettyprint">
-
-  - email: "<span data-bind="text: email"></span>"
-  - fullname: "<span data-bind="text: fullname"></span>"
-  - gender: "<span data-bind="text: gender"></span>"
-  - birthday: "<span data-bind="text: displayBirthday"></span>"
-  - occupation: "<span data-bind="text: occupation"></span>"
-  - address: "<span data-bind="text: address"></span>"
-  - location: 
-    + lat: <span data-bind="text: lat"></span>
-    + lng: <span data-bind="text: lng"></span>
-  
-
+        - email: "<span data-bind="text: email"></span>"
+        - fullname: "<span data-bind="text: fullname"></span>"
+        - gender: "<span data-bind="text: gender"></span>"
+        - birthday: "<span data-bind="text: displayBirthday"></span>"
+        - occupation: "<span data-bind="text: occupation"></span>"
+        - address: "<span data-bind="text: address"></span>"
+        - location: 
+            + lat: <span data-bind="text: lat"></span>
+            + lng: <span data-bind="text: lng"></span>
     </pre>
 </div>
 
 <div class="register-container">
     <h2>ĐĂNG KÝ NHẬN TÀI LIỆU</h2>
     <p class="sub-title">Điền thông tin bên dưới để nhận tài liệu AI miễn phí.</p>
-    
+
     <form id="registerForm" action="<?= base_url('index.php/register/submit'); ?>" method="post">
         <label>Email *</label>
         <input type="email" name="email" placeholder="Ví dụ: nva@gmail.com" required 
@@ -131,13 +128,13 @@
                data-bind="source: occupations, value: occupation" 
                placeholder="Ví dụ: Sinh viên, Kỹ sư..." style="width: 100%">
 
-        <label>Địa chỉ chi tiết *</label>
+        <label>Địa chỉ</label>
         <input type="text" id="addressAutocomplete" name="address" required
-               placeholder="Gõ để tìm địa chỉ (ví dụ: 123 Lê Lợi...)" 
+               placeholder="171 Nguyễn Tư gian..." 
                data-bind="value: address" style="width: 100%">
 
-        <input type="hidden" name="lat" id="lat">
-        <input type="hidden" name="lng" id="lng">
+        <input type="hidden" name="lat" data-bind="value: lat">
+        <input type="hidden" name="lng" data-bind="value: lng">
         
         <div id="status" class="location-status">
             <span data-bind="text: locationStatus, style: { color: statusColor }">🔍 Đang xác định vị trí...</span>
@@ -157,13 +154,11 @@
                             borderStyle: btnBorderStyle,
                             borderColor: btnBorderColor,
                             borderRadius: btnBorderRadius
-                        }">
-
+                        }, 
+                        events: { click: listener, dblclick: listener, mouseover: listener, mouseout: listener }">
                         Đăng ký ngay
                         <span class="arrow">▼</span>
                     </button>
-
-                    <!-- DROPDOWN FORM -->
                     <div class="register-dropdown">
                         <ul class="fieldlist">
                             <li>
@@ -222,14 +217,12 @@
             locationStatus: "🔍 Đang xác định vị trí...",
             statusColor: "#94a3b8",
 
-            // STYLE NÚT
             btnColor: "#ffffff",
             btnBackground: "#7367f0",
             btnBorderColor: "#ff8c00",
             btnBorderStyle: "solid",
             btnBorderRadius: "8px",
 
-            // DATA SOURCE
             radio: [
                 "0px",
                 "6px",
@@ -300,6 +293,10 @@
 
             displayBirthday: function() {
                 return kendo.toString(this.get("birthday"), "dd/MM/yyyy");
+            },
+
+            listener: function(e) {
+                console.log("Event on Register Button: " + e.type);
             }
         });
 
@@ -323,7 +320,7 @@
                                 format: "json",
                                 addressdetails: 1,
                                 limit: 5,
-                                countrycodes: "vn" // Chỉ tìm kiếm tại Việt Nam
+                                // countrycodes: "vn" // Chỉ tìm kiếm tại Việt Nam
                             };
                         }
                     }
@@ -340,9 +337,9 @@
 
         $("#stateWindow").kendoWindow({
             width: "350px",
-            title: "info",
+            title: "Thông tin đăng ký",
             visible: true,
-            actions: ["Minimize", "Maximize"],
+            actions: ["Minimize"],
         }).data("kendoWindow").wrapper.css({
             position: "fixed",
             top: "50%",
@@ -358,13 +355,24 @@
                     viewModel.set("lng", position.coords.longitude);
                     viewModel.set("locationStatus", "✅ Đã lấy được vị trí của bạn.");
                     viewModel.set("statusColor", "#28c76f");
-                    $("#lat").val(position.coords.latitude);
-                    $("#lng").val(position.coords.longitude);
                 }, 
                 function(error) {
-                    viewModel.set("locationStatus", "❌ Không thể xác định vị trí.");
+                    var msg = "❌ Không thể xác định vị trí.";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            msg = "❌ Bạn đã từ chối quyền truy cập vị trí.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            msg = "❌ Thông tin vị trí không khả dụng.";
+                            break;
+                        case error.TIMEOUT:
+                            msg = "❌ Hết thời gian chờ lấy vị trí.";
+                            break;
+                    }
+                    viewModel.set("locationStatus", msg);
                     viewModel.set("statusColor", "#ea5455");
-                }
+                },
+                { timeout: 10000, enableHighAccuracy: true }
             );
         } else {
             viewModel.set("locationStatus", "❌ Trình duyệt không hỗ trợ định vị.");

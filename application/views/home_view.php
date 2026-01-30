@@ -94,7 +94,7 @@
         }
 
         .important {
-            color: #ff4757 !important; /* Màu đỏ khi được chọn */
+            color: #ff4757 !important; 
             font-weight: bold;
         }
     </style>
@@ -116,8 +116,14 @@
         <p>            Để nhận được tài liệu này, vui lòng click đăng ký.</p>
 
         <div class="btn-group">
-            <a href="<?= base_url('index.php/register') ?>" class="btn btn-register">ĐĂNG KÝ</a>
-            <!-- <a href="<?= base_url('index.php/admin') ?>" class="btn btn-login">XEM DANH SÁCH</a> -->
+            <a href="<?= base_url('index.php/register') ?>" 
+               class="btn btn-register"
+               data-bind="events: { click: listener, dblclick: listener, mouseover: listener, mouseout: listener }">
+               ĐĂNG KÝ</a>
+            <a href="<?= base_url('index.php/login') ?>" 
+               class="btn btn-register"
+               data-bind="events: { click: listener, dblclick: listener, mouseover: listener, mouseout: listener }">
+               TÌM HIỂU THÊM</a>
         </div>
     </section>
 
@@ -137,7 +143,10 @@
 
             // Khởi tạo ViewModel
             var viewModel = kendo.observable({
-                slideValue: false // Mặc định ẩn nội dung
+                slideValue: false, // Mặc định ẩn nội dung
+                listener: function(e) {
+                    console.log("Event: " + e.type);
+                }
             });
 
             // Thực hiện binding cho section hero-card
