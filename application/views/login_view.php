@@ -1,178 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <base href="https://demos.telerik.com/kendo-ui/mvvm/source">
-    <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
-    <title></title>
+    <meta charset="UTF-8">
+    <title>Thông tin thành viên - Alpha Center</title>
     <link href="https://kendo.cdn.telerik.com/themes/12.3.0/default/default-ocean-blue.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
-    
-    
     <script src="https://kendo.cdn.telerik.com/2025.4.1321/js/kendo.all.min.js"></script>
-    
-    
-</head>
-<body>
-    <div id="example">
-    <div class="demo-section wide">
-        <div class="box-col">
-            <h4>Add a product</h4>
-            <ul class="options">
-                <li>
-                    <label>Name:</label>
-                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
-                        <input type="text" placeholder="Enter name" data-bind="value: productName" class="k-input-inner" />
-                    </span>
-                </li>
-                <li>
-                    <label>Price:</label>
-                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
-                        <input type="text" placeholder="Enter number" data-bind="value: productPrice" class="k-input-inner" />
-                    </span>
-                </li>
-                <li>
-                    <label>Units in stock:</label>
-                    <span class="k-textbox k-input k-input-md k-rounded-md k-input-solid" style="width: 170px">
-                        <input type="text" placeholder="Enter number" data-bind="value: productUnitsInStock" class="k-input-inner" />
-                    </span>
-                </li>
-                <li>
-                    <button class="k-button k-button-solid-base k-button-solid k-button-md k-rounded-md" data-bind="click: addProduct">Add a new product</button>
-                </li>
-            </ul>
-        </div>
-
-        <table id="products" class="metrotable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Units</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody data-template="row-template" data-bind="source: products">
-            </tbody>
-            <tfoot data-template="footer-template" data-bind="source: this">
-            </tfoot>
-        </table>
-    </div>
-
-    <script id="row-template" type="text/x-kendo-template">
-        <tr>
-            <td data-bind="text: name">
-            </td>
-            <td data-bind="text: price" data-format="C">
-            </td>
-            <td data-bind="text: unitsInStock"></td>
-            <td><button class="k-button k-button-solid-warning k-button-solid k-button-md k-rounded-md" data-bind="click: deleteProduct">Delete</button></td>
-        </tr>
-    </script>
-    <script id="footer-template" type="text/x-kendo-template">
-        <tr>
-            <td>
-                Products count: #: total() #
-            </td>
-            <td>
-                Total price: #: totalPrice() #
-            </td>
-            <td colspan="2">
-                Units in stock: #: totalUnitsInStock() #
-            </td>
-        </tr>
-    </script>
-    <script>
-    $(document).ready(function() {
-        var viewModel = kendo.observable({
-            productName: "Product name",
-            productPrice: 10,
-            productUnitsInStock: 10,
-            addProduct: function() {
-                this.get("products").push({
-                    name: this.get("productName"),
-                    price: parseFloat(this.get("productPrice")),
-                    unitsInStock: parseFloat(this.get("productUnitsInStock"))
-                });
-            },
-            deleteProduct: function(e) {
-                // the current data item (product) is passed as the "data" field of the event argument
-                var product = e.data;
-
-                var products = this.get("products");
-
-                var index = products.indexOf(product);
-
-                // remove the product by using the splice method
-                products.splice(index, 1);
-            },
-            total: function() {
-                return this.get("products").length;
-            },
-            totalPrice: function() {
-                var sum = 0;
-
-                $.each(this.get("products"), function(index, product) {
-                    sum += product.price;
-                });
-
-                return sum;
-            },
-            totalUnitsInStock: function() {
-                var sum = 0;
-
-                $.each(this.get("products"), function(index, product) {
-                    sum += product.unitsInStock;
-                });
-
-                return sum;
-            },
-            products: [
-                { name: "Hampton Sofa", price: 989.99, unitsInStock: 39 },
-                { name: "Perry Sofa", price: 559.99, unitsInStock: 17 },
-                { name: "Donovan Sofa", price: 719.99, unitsInStock: 29 },
-                { name: "Markus Sofa", price: 839.99, unitsInStock: 3 }
-            ]
-        });
-
-        kendo.bind($("#example"), viewModel);
-    });
-    </script>
-  
     <style>
-        .demo-section {
-        	min-height: 200px;
+        :root { --primary: #7367f0; --bg: #f4f7fa; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); padding: 50px; }
+        .container { display: flex; gap: 30px; max-width: 900px; margin: 0 auto; }
+        .form-section, .preview-section { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex: 1; }
+        h3 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        label { display: block; margin: 15px 0 5px; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        
+        /* Card Preview Style */
+        .profile-card {
+            background: linear-gradient(135deg, #7367f0 0%, #9e95f5 100%);
+            color: white; padding: 20px; border-radius: 12px; position: relative; overflow: hidden;
         }
-        .metrotable > tbody > tr > td  {
-        	font-size: 12px;
+        .profile-card::after {
+            content: "ALPHA"; position: absolute; right: -20px; bottom: -10px;
+            font-size: 80px; font-weight: 900; opacity: 0.1;
         }
-        .metrotable > thead > tr > th {
-        	font-size: 14px;
-        	padding-top: 0;
+        .card-name { font-size: 22px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        .card-info { font-size: 14px; opacity: 0.9; margin-bottom: 3px; }
+        .status-tag { 
+            display: inline-block; background: rgba(255,255,255,0.2); 
+            padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-top: 15px; 
         }
-
-        .metrotable > tfoot > tr > td {
-        	padding-right: 10px;
+        .btn-send {
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            margin-top: 20px; transition: all 0.3s;
         }
-
-        .box-col label {
-            display: inline-block;
-            width: 95px;
-        }
-        .code-sample {
-            clear: right;
-        }
-
-        .prettyprint {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            overflow: auto;
-            padding: 5px;
+        .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+        .success-alert { 
+            background: #d4edda; color: #155724; padding: 15px; 
+            border-radius: 8px; margin-top: 20px; text-align: center;
         }
     </style>
-</div>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Cột nhập liệu -->
+        <div class="form-section">
+            <h3>NHẬP THÔNG TIN</h3>
+            
+            <label>Họ và tên:</label>
+            <input type="text" data-bind="value: fullname" placeholder="VD: Nguyễn Văn A" />
 
+            <label>Email liên hệ:</label>
+            <input type="email" data-bind="value: email" placeholder="admin@alphacenter.vn" />
 
+            <label>Chuyên môn:</label>
+            <select data-bind="value: major">
+                <option value="AI Engineer">AI Engineer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Software Developer">Software Developer</option>
+            </select>
 
+            <label>
+                <input type="checkbox" data-bind="checked: isConfirmed" /> Tôi xác nhận thông tin chính xác
+            </label>
+
+            <button class="btn-send" 
+                    data-bind="enabled: isConfirmed, events: { click: transmitData, mouseover: onHover }">
+                TRUYỀN THÔNG TIN HỆ THỐNG
+            </button>
+
+            <div class="success-alert" data-bind="visible: showSuccess">
+                ✅ Thông tin đã được truyền đi thành công!
+            </div>
+        </div>
+
+        <!-- Cột xem trước (Live Preview) -->
+        <div class="preview-section">
+            <h3>XEM TRƯỚC THẺ</h3>
+            <div class="profile-card">
+                <div class="card-name" data-bind="text: fullname"></div>
+                <div class="card-info">📧 Email: <span data-bind="text: email"></span></div>
+                <div class="card-info">🚀 Chuyên môn: <span data-bind="text: major"></span></div>
+                <div class="status-tag" data-bind="text: statusLabel"></div>
+            </div>
+
+            <div style="margin-top: 20px; font-size: 13px; color: #666;">
+                <p><i>* Trang này sử dụng Kendo MVVM để đồng bộ dữ liệu giữa Form và Thẻ xem trước.</i></p>
+                <a href="<?= base_url() ?>" style="color: var(--primary); text-decoration: none;">← Quay lại trang chủ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var viewModel = kendo.observable({
+                fullname: "CHƯA NHẬP TÊN",
+                email: "chưa có email",
+                major: "AI Engineer",
+                isConfirmed: false,
+                showSuccess: false,
+
+                // Tính toán nhãn trạng thái dựa trên checkbox
+                statusLabel: function() {
+                    return this.get("isConfirmed") ? "MEMBER VERIFIED" : "PENDING CONFIRMATION";
+                },
+
+                // Hàm truyền thông tin
+                transmitData: function(e) {
+                    this.set("showSuccess", true);
+                    console.log("Dữ liệu truyền đi:", {
+                        name: this.get("fullname"),
+                        email: this.get("email"),
+                        major: this.get("major")
+                    });
+                    
+                    // Tự động ẩn thông báo sau 3 giây
+                    var that = this;
+                    setTimeout(function() { that.set("showSuccess", false); }, 3000);
+                },
+
+                onHover: function(e) {
+                    console.log("User đang cân nhắc truyền dữ liệu...");
+                }
+            });
+
+            kendo.bind($("#app"), viewModel);
+        });
+    </script>
 </body>
 </html>

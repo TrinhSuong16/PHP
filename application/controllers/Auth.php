@@ -6,9 +6,10 @@ class Auth extends WFF_Controller {
 
     public function login() {
         // Nếu đã đăng nhập rồi thì vào thẳng admin
-        if($this->session->userdata('admin_logged_in')) {
-            redirect('admin');
-        }
+        // Tạm thời comment để test giao diện login
+        // if($this->session->userdata('admin_logged_in')) {
+        //     redirect('admin');
+        // }
         $this->load->view('login_view', $this->data);
     }
 

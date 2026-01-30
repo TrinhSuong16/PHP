@@ -120,7 +120,7 @@
                class="btn btn-register"
                data-bind="events: { click: listener, dblclick: listener, mouseover: listener, mouseout: listener }">
                ĐĂNG KÝ</a>
-            <a href="<?= base_url('index.php/login') ?>" 
+            <a href="<?= base_url('index.php/auth/login') ?>" 
                class="btn btn-register"
                data-bind="events: { click: listener, dblclick: listener, mouseover: listener, mouseout: listener }">
                TÌM HIỂU THÊM</a>
@@ -129,7 +129,6 @@
 
     <script>
         $(document).ready(function() {
-            // Định nghĩa Custom Binder "slide" cho Kendo UI
             kendo.data.binders.slide = kendo.data.Binder.extend({
                 refresh: function() {
                     var value = this.bindings["slide"].get();
